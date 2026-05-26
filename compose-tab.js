@@ -124,6 +124,12 @@ function renderContacts(list) {
     const li = document.createElement("li");
     const name = document.createElement("span");
     const email = document.createElement("span");
+    const emailValue = String(c.email || "").trim();
+    const initial = emailValue.charAt(0).toUpperCase() || "?";
+    const colorIndex = initial.charCodeAt(0) % 8;
+
+    li.dataset.initial = initial;
+    li.classList.add(`avatarColor${colorIndex}`);
     name.className = "contactName";
     email.className = "contactEmail";
     name.textContent = c.name || c.email;
