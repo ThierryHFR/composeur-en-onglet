@@ -1,0 +1,34 @@
+body { margin:0; font-family: system-ui, sans-serif; display:flex; height:100vh; background:#f5f5f5; color:#222; }
+#contactsPane { width:300px; background:#fff; border-right:1px solid #ddd; padding:14px; box-sizing:border-box; overflow:auto; }
+#contactsPane h2 { font-size:16px; margin:0 0 10px; }
+#contactSearch { width:100%; box-sizing:border-box; padding:8px; margin-bottom:8px; border:1px solid #bbb; border-radius:7px; }
+#contactStatus { font-size:12px; color:#666; margin:6px 0; }
+#contacts { list-style:none; padding:0; margin:0; }
+#contacts li { padding:8px; border-bottom:1px solid #eee; cursor:pointer; border-radius:6px; }
+#contacts li:hover { background:#eef4ff; }
+.contactName { font-weight:600; display:block; }
+.contactEmail { font-size:12px; color:#555; }
+main { flex:1; padding:18px; box-sizing:border-box; overflow:auto; }
+header { display:flex; justify-content:space-between; align-items:center; }
+h1 { font-size:20px; margin:0 0 12px; }
+#status { font-size:13px; color:#555; }
+input, select, button { font:inherit; }
+.fields input { display:block; width:100%; box-sizing:border-box; padding:10px; margin:7px 0; border:1px solid #ccc; border-radius:7px; background:white; }
+.toolbar { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; align-items:center; }
+.toolbar button, footer button, .emojiPanel button, .fileButton { border:1px solid #bbb; background:white; border-radius:7px; padding:7px 10px; cursor:pointer; }
+.toolbar button:hover, footer button:hover, .emojiPanel button:hover { background:#f0f0f0; }
+.separator { width:1px; height:26px; background:#ccc; margin:0 3px; }
+.colorLabel { display:inline-flex; align-items:center; gap:4px; border:1px solid #ddd; border-radius:7px; padding:3px 6px; background:#fff; }
+.colorLabel input { width:32px; height:26px; border:0; padding:0; background:transparent; }
+.emojiPanel { display:flex; flex-wrap:wrap; gap:4px; padding:8px; margin:8px 0; border:1px solid #ddd; border-radius:8px; background:white; }
+.emojiPanel button { font-size:20px; min-width:38px; padding:5px; }
+#editor { min-height:390px; background:white; border:1px solid #bbb; border-radius:9px; padding:14px; line-height:1.45; overflow:auto; }
+#editor:focus { outline:2px solid #8ab4f8; }
+#editor img { max-width:100%; height:auto; }
+.attachments { margin:12px 0; font-size:13px; }
+.fileButton input { display:none; }
+#attachmentList div { padding:4px 0; }
+#attachmentList button { margin-left:8px; font-size:12px; }
+footer { display:flex; gap:8px; margin-top:12px; }
+#sendDirect { background:#0b57d0; color:white; border-color:#0b57d0; }
+#sendDirect:disabled { opacity:.6; cursor:wait; }

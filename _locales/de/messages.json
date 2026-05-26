@@ -1,0 +1,221 @@
+{
+  "extensionName": {
+    "message": "Verfassen im Tab"
+  },
+  "extensionDescription": {
+    "message": "Alternativer Tab-Composer für Thunderbird mit Rich-Text-Editor, Adressbuch und direktem Versand."
+  },
+  "actionTitle": {
+    "message": "Im Tab verfassen"
+  },
+  "newMessageTitle": {
+    "message": "Neue Nachricht"
+  },
+  "addressBookTitle": {
+    "message": "Adressbuch"
+  },
+  "searchContactPlaceholder": {
+    "message": "Kontakt suchen"
+  },
+  "loading": {
+    "message": "Wird geladen..."
+  },
+  "toPlaceholder": {
+    "message": "An"
+  },
+  "ccPlaceholder": {
+    "message": "Cc"
+  },
+  "bccPlaceholder": {
+    "message": "Bcc"
+  },
+  "subjectPlaceholder": {
+    "message": "Betreff"
+  },
+  "toolbarAria": {
+    "message": "Formatierungswerkzeuge"
+  },
+  "boldTitle": {
+    "message": "Fett"
+  },
+  "boldShort": {
+    "message": "F"
+  },
+  "italicTitle": {
+    "message": "Kursiv"
+  },
+  "italicShort": {
+    "message": "K"
+  },
+  "underlineTitle": {
+    "message": "Unterstrichen"
+  },
+  "underlineShort": {
+    "message": "U"
+  },
+  "strikeTitle": {
+    "message": "Durchgestrichen"
+  },
+  "strikeShort": {
+    "message": "abc"
+  },
+  "alignLeftTitle": {
+    "message": "Links ausrichten"
+  },
+  "alignCenterTitle": {
+    "message": "Zentrieren"
+  },
+  "alignRightTitle": {
+    "message": "Rechts ausrichten"
+  },
+  "alignLeft": {
+    "message": "Links"
+  },
+  "alignCenter": {
+    "message": "Mitte"
+  },
+  "alignRight": {
+    "message": "Rechts"
+  },
+  "bulletedList": {
+    "message": "Liste"
+  },
+  "numberedList": {
+    "message": "1. Liste"
+  },
+  "outdent": {
+    "message": "- Einzug"
+  },
+  "indent": {
+    "message": "+ Einzug"
+  },
+  "formatTitle": {
+    "message": "Format"
+  },
+  "formatText": {
+    "message": "Text"
+  },
+  "formatH1": {
+    "message": "Überschrift 1"
+  },
+  "formatH2": {
+    "message": "Überschrift 2"
+  },
+  "formatH3": {
+    "message": "Überschrift 3"
+  },
+  "formatQuote": {
+    "message": "Zitat"
+  },
+  "formatPre": {
+    "message": "Vorformatiert"
+  },
+  "sizeTitle": {
+    "message": "Größe"
+  },
+  "sizeNormal": {
+    "message": "Normal"
+  },
+  "sizeSmall": {
+    "message": "Klein"
+  },
+  "sizeLarge": {
+    "message": "Groß"
+  },
+  "sizeXLarge": {
+    "message": "Sehr groß"
+  },
+  "textColorLabel": {
+    "message": "Text"
+  },
+  "backgroundColorLabel": {
+    "message": "Hintergrund"
+  },
+  "textColorTitle": {
+    "message": "Textfarbe"
+  },
+  "backgroundColorTitle": {
+    "message": "Hintergrundfarbe"
+  },
+  "linkButton": {
+    "message": "Link"
+  },
+  "unlinkButton": {
+    "message": "Link entfernen"
+  },
+  "imageUrlButton": {
+    "message": "Bild-URL"
+  },
+  "imageFileButton": {
+    "message": "Bilddatei"
+  },
+  "emojiButton": {
+    "message": "Emoticons"
+  },
+  "clearFormatButton": {
+    "message": "Stil löschen"
+  },
+  "bodyAria": {
+    "message": "Nachrichtentext"
+  },
+  "attachmentsButton": {
+    "message": "Anhänge"
+  },
+  "sendDirectButton": {
+    "message": "Senden"
+  },
+  "openNativeButton": {
+    "message": "In Thunderbird fortsetzen"
+  },
+  "resetButton": {
+    "message": "Zurücksetzen"
+  },
+  "duplicateAddress": {
+    "message": "Adresse bereits hinzugefügt: $1"
+  },
+  "contactsCount": {
+    "message": "$1 Kontakt(e)"
+  },
+  "noContacts": {
+    "message": "Keine sichtbaren Kontakte"
+  },
+  "addressBookError": {
+    "message": "Adressbuchfehler: $1"
+  },
+  "linkPrompt": {
+    "message": "Linkadresse"
+  },
+  "imagePrompt": {
+    "message": "Bildadresse"
+  },
+  "fileReadError": {
+    "message": "Datei kann nicht gelesen werden"
+  },
+  "removeAttachment": {
+    "message": "Entfernen"
+  },
+  "attachmentFallbackName": {
+    "message": "anhang"
+  },
+  "openingComposer": {
+    "message": "Composer wird geöffnet..."
+  },
+  "genericError": {
+    "message": "Fehler: $1"
+  },
+  "sendingButton": {
+    "message": "Senden..."
+  },
+  "sendingStatus": {
+    "message": "Senden läuft..."
+  },
+  "sentStatus": {
+    "message": "Nachricht gesendet."
+  },
+  "sendError": {
+    "message": "Sendefehler: $1"
+  },
+  "attachmentSize": {
+    "message": "$1 ($2 KB)"
+  }
+}

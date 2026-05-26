@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="newMessageTitle">Nouveau message</title>
+  <link rel="stylesheet" href="compose-tab.css">
+</head>
+<body>
+  <aside id="contactsPane">
+    <h2 data-i18n="addressBookTitle">Carnet d'adresses</h2>
+    <input id="contactSearch" type="search" data-i18n-placeholder="searchContactPlaceholder" placeholder="Rechercher un contact">
+    <div id="contactStatus" data-i18n="loading">Chargement...</div>
+    <ul id="contacts"></ul>
+  </aside>
+
+  <main>
+    <header>
+      <h1 data-i18n="newMessageTitle">Nouveau message</h1>
+      <div id="status"></div>
+    </header>
+
+    <section class="fields">
+      <input id="to" class="recipient" data-i18n-placeholder="toPlaceholder" placeholder="À" autocomplete="off" spellcheck="false">
+      <input id="cc" class="recipient" data-i18n-placeholder="ccPlaceholder" placeholder="Cc" autocomplete="off" spellcheck="false">
+      <input id="bcc" class="recipient" data-i18n-placeholder="bccPlaceholder" placeholder="Cci" autocomplete="off" spellcheck="false">
+      <input id="subject" data-i18n-placeholder="subjectPlaceholder" placeholder="Sujet" spellcheck="true">
+    </section>
+
+    <section class="toolbar" data-i18n-aria-label="toolbarAria" aria-label="Outils de mise en forme">
+      <button data-cmd="bold" data-i18n-title="boldTitle" title="Gras"><b data-i18n="boldShort">G</b></button>
+      <button data-cmd="italic" data-i18n-title="italicTitle" title="Italique"><i data-i18n="italicShort">I</i></button>
+      <button data-cmd="underline" data-i18n-title="underlineTitle" title="Souligné"><u data-i18n="underlineShort">S</u></button>
+      <button data-cmd="strikeThrough" data-i18n-title="strikeTitle" title="Barré"><s data-i18n="strikeShort">abc</s></button>
+      <span class="separator"></span>
+      <button data-cmd="justifyLeft" data-i18n-title="alignLeftTitle" data-i18n="alignLeft">Gauche</button>
+      <button data-cmd="justifyCenter" data-i18n-title="alignCenterTitle" data-i18n="alignCenter">Centre</button>
+      <button data-cmd="justifyRight" data-i18n-title="alignRightTitle" data-i18n="alignRight">Droite</button>
+      <span class="separator"></span>
+      <button data-cmd="insertUnorderedList" data-i18n="bulletedList">Liste</button>
+      <button data-cmd="insertOrderedList" data-i18n="numberedList">1. Liste</button>
+      <button data-cmd="outdent" data-i18n="outdent">- Retrait</button>
+      <button data-cmd="indent" data-i18n="indent">+ Retrait</button>
+      <span class="separator"></span>
+      <select id="formatBlock" data-i18n-title="formatTitle" title="Format">
+        <option value="div" data-i18n="formatText">Texte</option>
+        <option value="h1" data-i18n="formatH1">Titre 1</option>
+        <option value="h2" data-i18n="formatH2">Titre 2</option>
+        <option value="h3" data-i18n="formatH3">Titre 3</option>
+        <option value="blockquote" data-i18n="formatQuote">Citation</option>
+        <option value="pre" data-i18n="formatPre">Préformaté</option>
+      </select>
+      <select id="fontSize" data-i18n-title="sizeTitle" title="Taille">
+        <option value="3" data-i18n="sizeNormal">Normal</option>
+        <option value="2" data-i18n="sizeSmall">Petit</option>
+        <option value="4" data-i18n="sizeLarge">Grand</option>
+        <option value="5" data-i18n="sizeXLarge">Très grand</option>
+      </select>
+      <label class="colorLabel"><span data-i18n="textColorLabel">Texte</span> <input id="foreColor" type="color" data-i18n-title="textColorTitle" title="Couleur du texte"></label>
+      <label class="colorLabel"><span data-i18n="backgroundColorLabel">Fond</span> <input id="hiliteColor" type="color" data-i18n-title="backgroundColorTitle" title="Couleur de fond"></label>
+      <span class="separator"></span>
+      <button id="linkBtn" data-i18n="linkButton">Lien</button>
+      <button id="unlinkBtn" data-i18n="unlinkButton">Supprimer lien</button>
+      <button id="imageUrlBtn" data-i18n="imageUrlButton">Image URL</button>
+      <button id="imageFileBtn" data-i18n="imageFileButton">Image fichier</button>
+      <button id="emojiToggle" data-i18n="emojiButton">Émoticônes</button>
+      <button id="clearFormatBtn" data-i18n="clearFormatButton">Effacer style</button>
+      <input id="inlineImageFile" type="file" accept="image/*" hidden>
+    </section>
+
+    <section id="emojiPanel" class="emojiPanel" hidden></section>
+
+    <div id="editor" contenteditable="true" spellcheck="true" data-i18n-aria-label="bodyAria" aria-label="Corps du message"></div>
+
+    <section class="attachments">
+      <label class="fileButton"><span data-i18n="attachmentsButton">Pièces jointes</span> <input id="attachments" type="file" multiple></label>
+      <div id="attachmentList"></div>
+    </section>
+
+    <footer>
+      <button id="sendDirect" data-i18n="sendDirectButton">Envoyer</button>
+      <button id="openNative" data-i18n="openNativeButton" style="display: none;">Continuer dans Thunderbird</button>
+      <button id="reset" data-i18n="resetButton">Réinitialiser</button>
+    </footer>
+  </main>
+
+  <script src="compose-tab.js"></script>
+</body>
+</html>

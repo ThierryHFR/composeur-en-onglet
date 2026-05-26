@@ -1,0 +1,221 @@
+{
+  "extensionName": {
+    "message": "Tab Composer"
+  },
+  "extensionDescription": {
+    "message": "Alternative tab composer for Thunderbird with rich editor, address book and direct sending."
+  },
+  "actionTitle": {
+    "message": "Compose in tab"
+  },
+  "newMessageTitle": {
+    "message": "New message"
+  },
+  "addressBookTitle": {
+    "message": "Address book"
+  },
+  "searchContactPlaceholder": {
+    "message": "Search a contact"
+  },
+  "loading": {
+    "message": "Loading..."
+  },
+  "toPlaceholder": {
+    "message": "To"
+  },
+  "ccPlaceholder": {
+    "message": "Cc"
+  },
+  "bccPlaceholder": {
+    "message": "Bcc"
+  },
+  "subjectPlaceholder": {
+    "message": "Subject"
+  },
+  "toolbarAria": {
+    "message": "Formatting tools"
+  },
+  "boldTitle": {
+    "message": "Bold"
+  },
+  "boldShort": {
+    "message": "B"
+  },
+  "italicTitle": {
+    "message": "Italic"
+  },
+  "italicShort": {
+    "message": "I"
+  },
+  "underlineTitle": {
+    "message": "Underline"
+  },
+  "underlineShort": {
+    "message": "U"
+  },
+  "strikeTitle": {
+    "message": "Strikethrough"
+  },
+  "strikeShort": {
+    "message": "abc"
+  },
+  "alignLeftTitle": {
+    "message": "Align left"
+  },
+  "alignCenterTitle": {
+    "message": "Center"
+  },
+  "alignRightTitle": {
+    "message": "Align right"
+  },
+  "alignLeft": {
+    "message": "Left"
+  },
+  "alignCenter": {
+    "message": "Center"
+  },
+  "alignRight": {
+    "message": "Right"
+  },
+  "bulletedList": {
+    "message": "List"
+  },
+  "numberedList": {
+    "message": "1. List"
+  },
+  "outdent": {
+    "message": "- Outdent"
+  },
+  "indent": {
+    "message": "+ Indent"
+  },
+  "formatTitle": {
+    "message": "Format"
+  },
+  "formatText": {
+    "message": "Text"
+  },
+  "formatH1": {
+    "message": "Heading 1"
+  },
+  "formatH2": {
+    "message": "Heading 2"
+  },
+  "formatH3": {
+    "message": "Heading 3"
+  },
+  "formatQuote": {
+    "message": "Quote"
+  },
+  "formatPre": {
+    "message": "Preformatted"
+  },
+  "sizeTitle": {
+    "message": "Size"
+  },
+  "sizeNormal": {
+    "message": "Normal"
+  },
+  "sizeSmall": {
+    "message": "Small"
+  },
+  "sizeLarge": {
+    "message": "Large"
+  },
+  "sizeXLarge": {
+    "message": "Very large"
+  },
+  "textColorLabel": {
+    "message": "Text"
+  },
+  "backgroundColorLabel": {
+    "message": "Background"
+  },
+  "textColorTitle": {
+    "message": "Text color"
+  },
+  "backgroundColorTitle": {
+    "message": "Background color"
+  },
+  "linkButton": {
+    "message": "Link"
+  },
+  "unlinkButton": {
+    "message": "Remove link"
+  },
+  "imageUrlButton": {
+    "message": "Image URL"
+  },
+  "imageFileButton": {
+    "message": "Image file"
+  },
+  "emojiButton": {
+    "message": "Emoticons"
+  },
+  "clearFormatButton": {
+    "message": "Clear style"
+  },
+  "bodyAria": {
+    "message": "Message body"
+  },
+  "attachmentsButton": {
+    "message": "Attachments"
+  },
+  "sendDirectButton": {
+    "message": "Send"
+  },
+  "openNativeButton": {
+    "message": "Continue in Thunderbird"
+  },
+  "resetButton": {
+    "message": "Reset"
+  },
+  "duplicateAddress": {
+    "message": "Address already added: $1"
+  },
+  "contactsCount": {
+    "message": "$1 contact(s)"
+  },
+  "noContacts": {
+    "message": "No visible contacts"
+  },
+  "addressBookError": {
+    "message": "Address book error: $1"
+  },
+  "linkPrompt": {
+    "message": "Link address"
+  },
+  "imagePrompt": {
+    "message": "Image address"
+  },
+  "fileReadError": {
+    "message": "Unable to read the file"
+  },
+  "removeAttachment": {
+    "message": "Remove"
+  },
+  "attachmentFallbackName": {
+    "message": "attachment"
+  },
+  "openingComposer": {
+    "message": "Opening composer..."
+  },
+  "genericError": {
+    "message": "Error: $1"
+  },
+  "sendingButton": {
+    "message": "Sending..."
+  },
+  "sendingStatus": {
+    "message": "Sending..."
+  },
+  "sentStatus": {
+    "message": "Message sent."
+  },
+  "sendError": {
+    "message": "Send error: $1"
+  },
+  "attachmentSize": {
+    "message": "$1 ($2 KB)"
+  }
+}

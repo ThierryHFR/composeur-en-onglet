@@ -1,0 +1,221 @@
+{
+  "extensionName": {
+    "message": "Redactor en pestaña"
+  },
+  "extensionDescription": {
+    "message": "Redactor alternativo en pestaña para Thunderbird con editor enriquecido, libreta de direcciones y envío directo."
+  },
+  "actionTitle": {
+    "message": "Redactar en pestaña"
+  },
+  "newMessageTitle": {
+    "message": "Nuevo mensaje"
+  },
+  "addressBookTitle": {
+    "message": "Libreta de direcciones"
+  },
+  "searchContactPlaceholder": {
+    "message": "Buscar un contacto"
+  },
+  "loading": {
+    "message": "Cargando..."
+  },
+  "toPlaceholder": {
+    "message": "Para"
+  },
+  "ccPlaceholder": {
+    "message": "Cc"
+  },
+  "bccPlaceholder": {
+    "message": "Cco"
+  },
+  "subjectPlaceholder": {
+    "message": "Asunto"
+  },
+  "toolbarAria": {
+    "message": "Herramientas de formato"
+  },
+  "boldTitle": {
+    "message": "Negrita"
+  },
+  "boldShort": {
+    "message": "N"
+  },
+  "italicTitle": {
+    "message": "Cursiva"
+  },
+  "italicShort": {
+    "message": "C"
+  },
+  "underlineTitle": {
+    "message": "Subrayado"
+  },
+  "underlineShort": {
+    "message": "S"
+  },
+  "strikeTitle": {
+    "message": "Tachado"
+  },
+  "strikeShort": {
+    "message": "abc"
+  },
+  "alignLeftTitle": {
+    "message": "Alinear a la izquierda"
+  },
+  "alignCenterTitle": {
+    "message": "Centrar"
+  },
+  "alignRightTitle": {
+    "message": "Alinear a la derecha"
+  },
+  "alignLeft": {
+    "message": "Izquierda"
+  },
+  "alignCenter": {
+    "message": "Centro"
+  },
+  "alignRight": {
+    "message": "Derecha"
+  },
+  "bulletedList": {
+    "message": "Lista"
+  },
+  "numberedList": {
+    "message": "1. Lista"
+  },
+  "outdent": {
+    "message": "- Disminuir sangría"
+  },
+  "indent": {
+    "message": "+ Aumentar sangría"
+  },
+  "formatTitle": {
+    "message": "Formato"
+  },
+  "formatText": {
+    "message": "Texto"
+  },
+  "formatH1": {
+    "message": "Título 1"
+  },
+  "formatH2": {
+    "message": "Título 2"
+  },
+  "formatH3": {
+    "message": "Título 3"
+  },
+  "formatQuote": {
+    "message": "Cita"
+  },
+  "formatPre": {
+    "message": "Preformateado"
+  },
+  "sizeTitle": {
+    "message": "Tamaño"
+  },
+  "sizeNormal": {
+    "message": "Normal"
+  },
+  "sizeSmall": {
+    "message": "Pequeño"
+  },
+  "sizeLarge": {
+    "message": "Grande"
+  },
+  "sizeXLarge": {
+    "message": "Muy grande"
+  },
+  "textColorLabel": {
+    "message": "Texto"
+  },
+  "backgroundColorLabel": {
+    "message": "Fondo"
+  },
+  "textColorTitle": {
+    "message": "Color del texto"
+  },
+  "backgroundColorTitle": {
+    "message": "Color de fondo"
+  },
+  "linkButton": {
+    "message": "Enlace"
+  },
+  "unlinkButton": {
+    "message": "Quitar enlace"
+  },
+  "imageUrlButton": {
+    "message": "URL de imagen"
+  },
+  "imageFileButton": {
+    "message": "Archivo de imagen"
+  },
+  "emojiButton": {
+    "message": "Emoticonos"
+  },
+  "clearFormatButton": {
+    "message": "Borrar estilo"
+  },
+  "bodyAria": {
+    "message": "Cuerpo del mensaje"
+  },
+  "attachmentsButton": {
+    "message": "Adjuntos"
+  },
+  "sendDirectButton": {
+    "message": "Enviar"
+  },
+  "openNativeButton": {
+    "message": "Continuar en Thunderbird"
+  },
+  "resetButton": {
+    "message": "Restablecer"
+  },
+  "duplicateAddress": {
+    "message": "Dirección ya añadida: $1"
+  },
+  "contactsCount": {
+    "message": "$1 contacto(s)"
+  },
+  "noContacts": {
+    "message": "No hay contactos visibles"
+  },
+  "addressBookError": {
+    "message": "Error de libreta: $1"
+  },
+  "linkPrompt": {
+    "message": "Dirección del enlace"
+  },
+  "imagePrompt": {
+    "message": "Dirección de la imagen"
+  },
+  "fileReadError": {
+    "message": "No se puede leer el archivo"
+  },
+  "removeAttachment": {
+    "message": "Quitar"
+  },
+  "attachmentFallbackName": {
+    "message": "adjunto"
+  },
+  "openingComposer": {
+    "message": "Abriendo redactor..."
+  },
+  "genericError": {
+    "message": "Error: $1"
+  },
+  "sendingButton": {
+    "message": "Enviando..."
+  },
+  "sendingStatus": {
+    "message": "Enviando..."
+  },
+  "sentStatus": {
+    "message": "Mensaje enviado."
+  },
+  "sendError": {
+    "message": "Error de envío: $1"
+  },
+  "attachmentSize": {
+    "message": "$1 ($2 KB)"
+  }
+}
