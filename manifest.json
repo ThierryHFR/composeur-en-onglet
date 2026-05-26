@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.1",
+  "version": "0.2.1",
   "description": "__MSG_extensionDescription__",
   "default_locale": "fr",
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "composeur-en-onglet@thierryh.local",
       "strict_min_version": "102.0"

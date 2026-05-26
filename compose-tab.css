@@ -1,34 +1,398 @@
-body { margin:0; font-family: system-ui, sans-serif; display:flex; height:100vh; background:#f5f5f5; color:#222; }
-#contactsPane { width:300px; background:#fff; border-right:1px solid #ddd; padding:14px; box-sizing:border-box; overflow:auto; }
-#contactsPane h2 { font-size:16px; margin:0 0 10px; }
-#contactSearch { width:100%; box-sizing:border-box; padding:8px; margin-bottom:8px; border:1px solid #bbb; border-radius:7px; }
-#contactStatus { font-size:12px; color:#666; margin:6px 0; }
-#contacts { list-style:none; padding:0; margin:0; }
-#contacts li { padding:8px; border-bottom:1px solid #eee; cursor:pointer; border-radius:6px; }
-#contacts li:hover { background:#eef4ff; }
-.contactName { font-weight:600; display:block; }
-.contactEmail { font-size:12px; color:#555; }
-main { flex:1; padding:18px; box-sizing:border-box; overflow:auto; }
-header { display:flex; justify-content:space-between; align-items:center; }
-h1 { font-size:20px; margin:0 0 12px; }
-#status { font-size:13px; color:#555; }
-input, select, button { font:inherit; }
-.fields input { display:block; width:100%; box-sizing:border-box; padding:10px; margin:7px 0; border:1px solid #ccc; border-radius:7px; background:white; }
-.toolbar { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; align-items:center; }
-.toolbar button, footer button, .emojiPanel button, .fileButton { border:1px solid #bbb; background:white; border-radius:7px; padding:7px 10px; cursor:pointer; }
-.toolbar button:hover, footer button:hover, .emojiPanel button:hover { background:#f0f0f0; }
-.separator { width:1px; height:26px; background:#ccc; margin:0 3px; }
-.colorLabel { display:inline-flex; align-items:center; gap:4px; border:1px solid #ddd; border-radius:7px; padding:3px 6px; background:#fff; }
-.colorLabel input { width:32px; height:26px; border:0; padding:0; background:transparent; }
-.emojiPanel { display:flex; flex-wrap:wrap; gap:4px; padding:8px; margin:8px 0; border:1px solid #ddd; border-radius:8px; background:white; }
-.emojiPanel button { font-size:20px; min-width:38px; padding:5px; }
-#editor { min-height:390px; background:white; border:1px solid #bbb; border-radius:9px; padding:14px; line-height:1.45; overflow:auto; }
-#editor:focus { outline:2px solid #8ab4f8; }
-#editor img { max-width:100%; height:auto; }
-.attachments { margin:12px 0; font-size:13px; }
-.fileButton input { display:none; }
-#attachmentList div { padding:4px 0; }
-#attachmentList button { margin-left:8px; font-size:12px; }
-footer { display:flex; gap:8px; margin-top:12px; }
-#sendDirect { background:#0b57d0; color:white; border-color:#0b57d0; }
-#sendDirect:disabled { opacity:.6; cursor:wait; }
+:root {
+  color-scheme: light dark;
+
+  --tb-bg: -moz-Dialog;
+  --tb-fg: -moz-DialogText;
+  --tb-window: -moz-Window;
+  --tb-window-text: -moz-WindowText;
+  --tb-field: Field;
+  --tb-field-text: FieldText;
+  --tb-button: ButtonFace;
+  --tb-button-text: ButtonText;
+  --tb-border: ThreeDShadow;
+  --tb-border-light: ThreeDLightShadow;
+  --tb-accent: Highlight;
+  --tb-accent-text: HighlightText;
+  --tb-muted: GrayText;
+
+  --radius: 3px;
+  --spacing: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font: message-box;
+  background: var(--tb-bg);
+  color: var(--tb-fg);
+}
+
+/* Carnet d'adresses */
+
+#contactsPane {
+  width: 360px;
+  flex: 0 0 360px;
+  height: 100vh;
+  background: var(--tb-window);
+  color: var(--tb-window-text);
+  border-right: 1px solid var(--tb-border);
+  padding: 10px;
+  overflow: auto;
+}
+
+#contactsPane h2 {
+  display: none;
+}
+
+#contactSearch {
+  width: 100%;
+  height: 42px;
+  padding: 8px 42px 8px 14px;
+  margin: 0 0 14px;
+
+  font-size: 16px;
+
+  background: var(--tb-field);
+  color: var(--tb-field-text);
+
+  border: 1px solid var(--tb-border);
+  border-radius: 8px;
+}
+
+#contactSearch:focus {
+  outline: 2px solid #6fa052;
+  outline-offset: 0;
+  border-color: #6fa052;
+}
+
+#contactStatus {
+  font-size: 12px;
+  color: var(--tb-muted);
+  margin: 8px 2px;
+}
+
+#contacts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#contacts li {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+
+  padding: 12px 10px;
+  margin: 4px 0;
+
+  background: var(--tb-field);
+  color: var(--tb-field-text);
+
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  border-radius: 10px;
+
+  cursor: default;
+}
+
+#contacts li:hover {
+  background: color-mix(in srgb, Highlight 10%, var(--tb-field));
+  border-color: color-mix(in srgb, Highlight 35%, transparent);
+}
+
+#contacts li::before {
+  content: attr(data-initial);
+  grid-row: 1 / span 2;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: #fff;
+
+  font-size: 20px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#contacts li.avatarColor0::before { background: #5b8def; color: #fff; }
+#contacts li.avatarColor1::before { background: #e67e22; color: #fff; }
+#contacts li.avatarColor2::before { background: #27ae60; color: #fff; }
+#contacts li.avatarColor3::before { background: #9b59b6; color: #fff; }
+#contacts li.avatarColor4::before { background: #d35400; color: #fff; }
+#contacts li.avatarColor5::before { background: #16a085; color: #fff; }
+#contacts li.avatarColor6::before { background: #c0392b; color: #fff; }
+#contacts li.avatarColor7::before { background: #607d8b; color: #fff; }
+
+.contactName {
+  grid-column: 2;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--tb-field-text);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contactEmail {
+  grid-column: 2;
+  font-size: 13px;
+  color: var(--tb-muted);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Zone principale */
+
+main {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100vh;
+  padding: 12px;
+  background: var(--tb-window);
+  color: var(--tb-window-text);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+#status {
+  font-size: 12px;
+  color: var(--tb-muted);
+}
+
+/* Champs */
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+.fields input {
+  display: block;
+  width: 100%;
+  padding: 5px 7px;
+  margin: 5px 0;
+  background: var(--tb-field);
+  color: var(--tb-field-text);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--radius);
+}
+
+.fields input:focus,
+#editor:focus,
+select:focus {
+  outline: 1px solid var(--tb-accent);
+  outline-offset: 0;
+}
+
+.fields {
+  flex: 0 0 auto;
+}
+
+/* Barre d'outils */
+
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--tb-border-light);
+}
+
+.toolbar button,
+footer button,
+.emojiPanel button,
+.fileButton,
+select {
+  min-height: 28px;
+  padding: 4px 8px;
+  background: var(--tb-button);
+  color: var(--tb-button-text);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--radius);
+  cursor: default;
+}
+
+.toolbar button:hover,
+footer button:hover,
+.emojiPanel button:hover,
+.fileButton:hover,
+select:hover {
+  background: color-mix(in srgb, var(--tb-button) 80%, var(--tb-accent) 20%);
+}
+
+.toolbar button:active,
+footer button:active {
+  background: color-mix(in srgb, var(--tb-button) 65%, var(--tb-accent) 35%);
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background: var(--tb-border);
+  margin: 0 4px;
+}
+
+.colorLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 3px 6px;
+  background: var(--tb-button);
+  color: var(--tb-button-text);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--radius);
+}
+
+.colorLabel input {
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--tb-border);
+  background: transparent;
+}
+
+/* Emojis */
+
+.emojiPanel {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 6px;
+  margin: 6px 0;
+  background: var(--tb-bg);
+  border: 1px solid var(--tb-border);
+}
+
+.emojiPanel button {
+  font-size: 18px;
+  min-width: 30px;
+  padding: 3px;
+}
+
+/* Éditeur */
+
+#editor {
+  flex: 1 1 auto;
+  min-height: 120px;
+  max-height: none;
+  margin-top: 8px;
+  padding: 10px;
+  line-height: 1.45;
+  background: var(--tb-field);
+  color: var(--tb-field-text);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--radius);
+  overflow: auto;
+}
+
+#editor img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Pièces jointes */
+
+.attachments {
+  flex: 0 0 auto;
+  margin: 8px 0;
+  max-height: 76px;
+  overflow: auto;
+  font-size: 13px;
+}
+
+.fileButton input {
+  display: none;
+}
+
+#attachmentList div {
+  padding: 3px 0;
+}
+
+#attachmentList button {
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+/* Footer */
+
+footer {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--tb-border-light);
+  background: var(--tb-window);
+}
+
+#sendDirect {
+  background: var(--tb-accent);
+  color: var(--tb-accent-text);
+  border-color: var(--tb-accent);
+}
+
+#sendDirect:hover {
+  filter: brightness(1.05);
+}
+
+#sendDirect:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+/* Adaptation sombre automatique */
+
+@media (prefers-color-scheme: dark) {
+  body,
+  main,
+  #contactsPane {
+    background: var(--tb-bg);
+    color: var(--tb-fg);
+  }
+
+  #editor,
+  .fields input,
+  #contactSearch {
+    background: var(--tb-field);
+    color: var(--tb-field-text);
+  }
+
+  .toolbar {
+    border-bottom-color: var(--tb-border);
+  }
+}
