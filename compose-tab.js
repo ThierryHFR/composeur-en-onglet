@@ -26,8 +26,126 @@ applyI18n();
 let activeRecipientField = "to";
 let allContacts = [];
 let selectedAttachments = [];
+let composeMode = "new";
+let sourceMessageId = null;
 const $ = id => document.getElementById(id);
 const editor = $("editor");
+
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function htmlToPlainText(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = String(html || "");
+  return (tmp.innerText || tmp.textContent || "").replace(/\u00a0/g, " ").trimEnd();
+}
+
+function extractHtmlBody(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = String(html || "");
+  const body = tmp.querySelector("body");
+  return body ? body.innerHTML : tmp.innerHTML;
+}
+
+function quoteOriginalMessage(html) {
+  const bodyHtml = extractHtmlBody(html);
+  if (!htmlToPlainText(bodyHtml).trim()) return "";
+  return `<blockquote type="cite" class="moz-cite-prefix">${bodyHtml}</blockquote>`;
+}
+
+function setEditorCursor(node, atEnd = false) {
+  editor.focus();
+  const range = document.createRange();
+  const sel = window.getSelection();
+  if (!node) node = editor;
+  if (atEnd) {
+    range.selectNodeContents(node);
+    range.collapse(false);
+  } else {
+    range.setStart(node, 0);
+    range.collapse(true);
+  }
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+function applyReplyOrReplyAllBody(ctx) {
+  const header = ctx && ctx.replyHeader ? ctx.replyHeader : "Le message original a écrit :";
+  const quotedOriginal = quoteOriginalMessage(ctx && ctx.originalBodyHtml ? ctx.originalBodyHtml : "");
+  const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
+
+  if (replyPosition === "below") {
+    editor.innerHTML = `<div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div><div>-- <br>Ma signature</div><div><br></div>`;
+    setEditorCursor(editor.lastChild, true);
+    return;
+  }
+
+  editor.innerHTML = `<div><br></div><div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div><div>-- <br>Ma signature</div>`;
+  setEditorCursor(editor.firstChild, false);
+}
+
+
+function buildForwardedMessageHtml(ctx, original) {
+  const parts = [];
+  if (htmlToPlainText(original).trim()) {
+    parts.push('<div>-------- Message transféré --------</div>');
+    if (ctx && ctx.forwardFrom) parts.push(`<div><b>De :</b> ${escapeHtml(ctx.forwardFrom)}</div>`);
+    if (ctx && ctx.forwardDate) parts.push(`<div><b>Date :</b> ${escapeHtml(ctx.forwardDate)}</div>`);
+    if (ctx && ctx.forwardSubject) parts.push(`<div><b>Sujet :</b> ${escapeHtml(ctx.forwardSubject)}</div>`);
+    if (ctx && ctx.forwardTo) parts.push(`<div><b>À :</b> ${escapeHtml(ctx.forwardTo)}</div>`);
+    parts.push('<div><br></div>');
+    parts.push(`<blockquote type="cite" class="moz-cite-prefix">${original}</blockquote>`);
+  }
+  return parts.join("");
+}
+
+function applyForwardBody(ctx) {
+  const original = ctx && ctx.originalBodyHtml ? extractHtmlBody(ctx.originalBodyHtml) : "";
+  const forwardedMessage = buildForwardedMessageHtml(ctx, original);
+  const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
+
+  if (replyPosition === "below") {
+    editor.innerHTML = `${forwardedMessage}<div><br></div><div>-- <br>Ma signature</div><div><br></div>`;
+    setEditorCursor(editor.lastChild, true);
+    return;
+  }
+
+  editor.innerHTML = `<div><br></div><div>-- <br>Ma signature</div><div><br></div>${forwardedMessage}`;
+  setEditorCursor(editor.firstChild, false);
+}
+
+async function addOriginalAttachments(messageId) {
+  try {
+    if (!browser.messages || !browser.messages.listAttachments || !browser.messages.getAttachmentFile) return;
+    const attachments = await browser.messages.listAttachments(Number(messageId));
+    for (const att of attachments || []) {
+      const partName = att.partName || att.name || att.filename;
+      if (!partName) continue;
+      const file = await browser.messages.getAttachmentFile(Number(messageId), partName);
+      if (file) selectedAttachments.push(file);
+    }
+    renderAttachments();
+  } catch (e) {
+    setStatus(msg("genericError", ["Pièces jointes du message original non ajoutées : " + String(e && e.message ? e.message : e)]));
+  }
+}
+
+function applyDefaultSignature() {
+  editor.innerHTML = "<div><br></div><div>-- <br>Ma signature</div>";
+  const range = document.createRange();
+  const sel = window.getSelection();
+  range.setStart(editor.firstChild, 0);
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
 
 for (const el of document.querySelectorAll(".recipient")) {
   el.addEventListener("focus", () => { activeRecipientField = el.id; });
@@ -230,6 +348,8 @@ $("attachments").addEventListener("change", () => {
 
 function collectMessage() {
   return {
+    composeMode,
+    sourceMessageId,
     to: $("to").value,
     cc: $("cc").value,
     bcc: $("bcc").value,
@@ -241,11 +361,13 @@ function collectMessage() {
 }
 
 function resetForm() {
+  composeMode = "new";
+  sourceMessageId = null;
   $("to").value = "";
   $("cc").value = "";
   $("bcc").value = "";
   $("subject").value = "";
-  editor.innerHTML = "";
+  applyDefaultSignature();
   selectedAttachments = [];
   $("attachments").value = "";
   $("attachmentList").textContent = "";
@@ -285,4 +407,34 @@ $("sendDirect").addEventListener("click", async () => {
 });
 
 $("reset").addEventListener("click", resetForm);
+async function applyStartupContext() {
+  const params = new URLSearchParams(location.search);
+  const mode = params.get("mode") || "new";
+  const messageId = params.get("messageId");
+  applyDefaultSignature();
+  if (!messageId || mode === "new") return;
+  try {
+    const ctx = await browser.runtime.sendMessage({ type: "get-message-compose-context", mode, messageId });
+    composeMode = ctx.mode || mode;
+    sourceMessageId = ctx.sourceMessageId || messageId;
+    $("to").value = ctx.to || "";
+    $("cc").value = ctx.cc || "";
+    $("bcc").value = ctx.bcc || "";
+    $("subject").value = ctx.subject || "";
+    if (composeMode === "reply" || composeMode === "replyAll") applyReplyOrReplyAllBody(ctx);
+    if (composeMode === "forward") {
+      applyForwardBody(ctx);
+      await addOriginalAttachments(sourceMessageId);
+    }
+    const title = composeMode === "forward" ? "Transférer" : (composeMode === "replyAll" ? "Répondre à tous" : "Répondre");
+    const h1 = document.querySelector("header h1");
+    if (h1) h1.textContent = title;
+    document.title = title;
+    focusEditor();
+  } catch (e) {
+    setStatus(msg("genericError", [String(e && e.message ? e.message : e)]));
+  }
+}
+
 loadContacts();
+applyStartupContext();

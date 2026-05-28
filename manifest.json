@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "__MSG_extensionDescription__",
   "default_locale": "fr",
   "browser_specific_settings": {
@@ -17,10 +17,14 @@
     "addressBooks",
     "accountsRead",
     "storage",
-    "windows"
+    "windows",
+    "messagesRead",
+    "messageDisplay"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "browser_action": {
     "default_title": "__MSG_actionTitle__",
@@ -34,5 +38,13 @@
     "32": "icons/icon-32.png",
     "64": "icons/icon-64.png",
     "128": "icons/icon-128.png"
+  },
+  "message_display_action": {
+    "default_title": "Répondre / Transférer",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    },
+    "default_popup": "message-actions.html"
   }
 }

@@ -396,3 +396,17 @@ footer {
     border-bottom-color: var(--tb-border);
   }
 }
+
+/* Citation de réponse, proche du rendu Thunderbird */
+#editor blockquote[type="cite"],
+#editor blockquote.moz-cite-prefix {
+  margin: 12px 0 24px 0;
+  padding: 0 0 0 14px;
+  border-left: 3px solid #7aa7d9;
+  color: inherit;
+}
+
+#editor blockquote[type="cite"] > :first-child,
+#editor blockquote.moz-cite-prefix > :first-child {
+  margin-top: 0;
+}
