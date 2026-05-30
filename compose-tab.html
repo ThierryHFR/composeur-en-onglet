@@ -32,14 +32,14 @@
       <button data-cmd="underline" data-i18n-title="underlineTitle" title="Souligné"><u data-i18n="underlineShort">S</u></button>
       <button data-cmd="strikeThrough" data-i18n-title="strikeTitle" title="Barré"><s data-i18n="strikeShort">abc</s></button>
       <span class="separator"></span>
-      <button data-cmd="justifyLeft" data-i18n-title="alignLeftTitle" data-i18n="alignLeft">Gauche</button>
-      <button data-cmd="justifyCenter" data-i18n-title="alignCenterTitle" data-i18n="alignCenter">Centre</button>
-      <button data-cmd="justifyRight" data-i18n-title="alignRightTitle" data-i18n="alignRight">Droite</button>
+      <button data-cmd="justifyLeft" data-i18n-title="alignLeftTitle"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 3h12v1H2V3zm0 3h9v1H2V6zm0 3h12v1H2V9zm0 3h9v1H2v-1z"/></svg></button>
+      <button data-cmd="justifyCenter" data-i18n-title="alignCenterTitle"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 3h12v1H2V3zm2 3h8v1H4V6zm-2 3h12v1H2V9zm2 3h8v1H4v-1z"/></svg></button>
+      <button data-cmd="justifyRight" data-i18n-title="alignRightTitle"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 3h12v1H2V3zm3 3h9v1H5V6zM2 9h12v1H2V9zm3 3h9v1H5v-1z"/></svg></button>
       <span class="separator"></span>
-      <button data-cmd="insertUnorderedList" data-i18n="bulletedList">Liste</button>
-      <button data-cmd="insertOrderedList" data-i18n="numberedList">1. Liste</button>
-      <button data-cmd="outdent" data-i18n="outdent">- Retrait</button>
-      <button data-cmd="indent" data-i18n="indent">+ Retrait</button>
+      <button data-cmd="insertUnorderedList"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm2-.5h10v1H5v-1zM3 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm2-.5h10v1H5v-1zM3 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm2-.5h10v1H5v-1z"/></svg></button>
+      <button data-cmd="insertOrderedList"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 2h1v4H2V3H1V2h1zm-1 5h3v1.1L2.4 10H4v1H1V9.9L2.6 8H1V7zm0 5h3v1H3v1H2v-1H1v-1zm5-8.5h9v1H6v-1zm0 4h9v1H6v-1zm0 4h9v1H6v-1z"/></svg></button>
+      <button data-cmd="outdent"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7 3h8v1H7V3zm0 3h8v1H7V6zm0 3h8v1H7V9zm0 3h8v1H7v-1zM1 8l4-3v6L1 8z"/></svg></button>
+      <button data-cmd="indent"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M7 3h8v1H7V3zm0 3h8v1H7V6zm0 3h8v1H7V9zm0 3h8v1H7v-1zM1 5l4 3-4 3V5z"/></svg></button>
       <span class="separator"></span>
       <select id="formatBlock" data-i18n-title="formatTitle" title="Format">
         <option value="div" data-i18n="formatText">Texte</option>
@@ -58,12 +58,12 @@
       <label class="colorLabel"><span data-i18n="textColorLabel">Texte</span> <input id="foreColor" type="color" data-i18n-title="textColorTitle" title="Couleur du texte"></label>
       <label class="colorLabel"><span data-i18n="backgroundColorLabel">Fond</span> <input id="hiliteColor" type="color" data-i18n-title="backgroundColorTitle" title="Couleur de fond"></label>
       <span class="separator"></span>
-      <button id="linkBtn" data-i18n="linkButton">Lien</button>
-      <button id="unlinkBtn" data-i18n="unlinkButton">Supprimer lien</button>
-      <button id="imageUrlBtn" data-i18n="imageUrlButton">Image URL</button>
-      <button id="imageFileBtn" data-i18n="imageFileButton">Image fichier</button>
-      <button id="emojiToggle" data-i18n="emojiButton" style="display: none;">Émoticônes</button>
-      <button id="clearFormatBtn" data-i18n="clearFormatButton">Effacer style</button>
+      <button id="linkBtn"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6.5 11.5H5a3 3 0 0 1 0-6h1.5v1H5a2 2 0 0 0 0 4h1.5v1zm3-6H11a3 3 0 0 1 0 6H9.5v-1H11a2 2 0 0 0 0-4H9.5v-1zM5.5 8.5v-1h5v1h-5z"/></svg></button>
+      <button id="unlinkBtn" data-i18n="unlinkButton" style="display: none;">Supprimer lien</button>
+      <button id="imageUrlBtn" data-i18n="imageUrlButton" style="display: none;">Image URL</button>
+      <button id="imageFileBtn"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 3h12v10H2V3zm1 1v8h10V4H3zm2 5 2-2 2 2 1-1 2 3H4l1-2zm6-4.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg></button>
+      <button id="emojiToggle" style="display: none;">Émoticônes</button>
+      <button id="clearFormatBtn"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M10.8 2 14 5.2 7.2 12H14v1H5.8L2 9.2 10.8 2zM3.4 9.2 6.2 12l6.4-6.8-1.8-1.8-7.4 5.8z"/></svg></button>
       <input id="inlineImageFile" type="file" accept="image/*" hidden>
     </section>
 

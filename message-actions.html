@@ -6,14 +6,16 @@
     body { font: menu; margin: 8px; min-width: 190px; }
     .title { font-weight: 600; margin: 0 0 8px; }
     button { display: block; width: 100%; margin: 4px 0; padding: 8px 10px; text-align: left; }
+    [hidden] { display: none !important; }
     #status { margin-top: 6px; font-size: 12px; opacity: .8; }
   </style>
 </head>
 <body>
-  <div class="title">Répondre / Transférer</div>
-  <button id="reply">↩ Répondre</button>
-  <button id="replyAll">↪ Répondre à tous</button>
-  <button id="forward">⇥ Transférer</button>
+  <div class="title" data-i18n="messageActionTitle">Répondre / Transférer</div>
+  <button id="editDraft" data-i18n="editDraftButton" hidden>✎ Modifier dans Composeur en onglet</button>
+  <button id="reply" data-i18n="replyButton">↩ Répondre</button>
+  <button id="replyAll" data-i18n="replyAllButton">↪ Répondre à tous</button>
+  <button id="forward" data-i18n="forwardButton">⇥ Transférer</button>
   <div id="status"></div>
   <script src="message-actions.js"></script>
 </body>
