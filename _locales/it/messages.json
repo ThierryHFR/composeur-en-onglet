@@ -217,5 +217,50 @@
   },
   "attachmentSize": {
     "message": "$1 ($2 KB)"
+  },
+  "messageActionTitle": {
+    "message": "Rispondi / Inoltra"
+  },
+  "replyButton": {
+    "message": "↩ Rispondi"
+  },
+  "replyAllButton": {
+    "message": "↪ Rispondi a tutti"
+  },
+  "forwardButton": {
+    "message": "⇥ Inoltra"
+  },
+  "noMessageSelected": {
+    "message": "Nessun messaggio selezionato."
+  },
+  "replyTitle": {
+    "message": "Rispondi"
+  },
+  "replyAllTitle": {
+    "message": "Rispondi a tutti"
+  },
+  "forwardTitle": {
+    "message": "Inoltra"
+  },
+  "optionsTitle": {
+    "message": "Opzioni"
+  },
+  "singleComposeTabLabel": {
+    "message": "Usa sempre una sola scheda di composizione"
+  },
+  "singleComposeTabHelp": {
+    "message": "Se questa opzione è attiva, l’estensione riutilizza la scheda di composizione già aperta. Se è disattivata, ogni nuovo messaggio apre una nuova scheda."
+  },
+  "optionsSaved": {
+    "message": "Opzione salvata."
+  },
+  "editDraftButton": {
+    "message": "✎ Modifica nel compositore in scheda"
+  },
+  "editDraftTitle": {
+    "message": "Modifica bozza"
+  },
+  "editDraftShortTitle": {
+    "message": "Modifica bozza"
   }
 }

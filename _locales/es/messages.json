@@ -217,5 +217,50 @@
   },
   "attachmentSize": {
     "message": "$1 ($2 KB)"
+  },
+  "messageActionTitle": {
+    "message": "Responder / Reenviar"
+  },
+  "replyButton": {
+    "message": "↩ Responder"
+  },
+  "replyAllButton": {
+    "message": "↪ Responder a todos"
+  },
+  "forwardButton": {
+    "message": "⇥ Reenviar"
+  },
+  "noMessageSelected": {
+    "message": "No hay ningún mensaje seleccionado."
+  },
+  "replyTitle": {
+    "message": "Responder"
+  },
+  "replyAllTitle": {
+    "message": "Responder a todos"
+  },
+  "forwardTitle": {
+    "message": "Reenviar"
+  },
+  "optionsTitle": {
+    "message": "Opciones"
+  },
+  "singleComposeTabLabel": {
+    "message": "Usar siempre una sola pestaña de redacción"
+  },
+  "singleComposeTabHelp": {
+    "message": "Si esta opción está activada, la extensión reutiliza la pestaña de redacción ya abierta. Si está desactivada, cada mensaje nuevo abre una pestaña nueva."
+  },
+  "optionsSaved": {
+    "message": "Opción guardada."
+  },
+  "editDraftButton": {
+    "message": "✎ Editar en el redactor en pestaña"
+  },
+  "editDraftTitle": {
+    "message": "Editar borrador"
+  },
+  "editDraftShortTitle": {
+    "message": "Editar borrador"
   }
 }

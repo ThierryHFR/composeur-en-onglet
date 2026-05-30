@@ -1,13 +1,13 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "__MSG_extensionDescription__",
   "default_locale": "fr",
   "browser_specific_settings": {
     "gecko": {
       "id": "composeur-en-onglet@thierryh.local",
-      "strict_min_version": "102.0"
+      "strict_min_version": "140.0"
     }
   },
   "permissions": [
@@ -19,7 +19,10 @@
     "storage",
     "windows",
     "messagesRead",
-    "messageDisplay"
+    "messageDisplay",
+    "messagesImport",
+    "messagesDelete",
+    "menus"
   ],
   "background": {
     "scripts": [
@@ -40,11 +43,15 @@
     "128": "icons/icon-128.png"
   },
   "message_display_action": {
-    "default_title": "Répondre / Transférer",
+    "default_title": "__MSG_messageActionTitle__",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"
     },
     "default_popup": "message-actions.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
   }
 }

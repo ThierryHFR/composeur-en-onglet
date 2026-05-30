@@ -28,6 +28,11 @@ let allContacts = [];
 let selectedAttachments = [];
 let composeMode = "new";
 let sourceMessageId = null;
+let draftKey = `compose-tab-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+let draftTimer = null;
+let lastDraftFingerprint = "";
+let messageWasSent = false;
+const DRAFT_SAVE_DELAY_MS = 30000;
 const $ = id => document.getElementById(id);
 const editor = $("editor");
 
@@ -157,6 +162,7 @@ function focusEditor() { editor.focus(); }
 function exec(cmd, value = null) {
   focusEditor();
   document.execCommand(cmd, false, value);
+  scheduleDraftSave();
 }
 
 function normalizeEmail(value) {
@@ -302,6 +308,7 @@ $("inlineImageFile").addEventListener("change", async () => {
   if (!file) return;
   const dataUrl = await readFileAsDataURL(file);
   exec("insertImage", dataUrl);
+  scheduleDraftSave();
   $("inlineImageFile").value = "";
 });
 
@@ -344,6 +351,7 @@ $("attachments").addEventListener("change", () => {
   selectedAttachments = [...selectedAttachments, ...Array.from($("attachments").files || [])];
   $("attachments").value = "";
   renderAttachments();
+  scheduleDraftSave();
 });
 
 function collectMessage() {
@@ -358,6 +366,64 @@ function collectMessage() {
     // beginNew() does not accept File objects directly in attachments.
     attachments: selectedAttachments.map(file => ({ file, name: file.name || msg("attachmentFallbackName") }))
   };
+}
+
+function collectDraftMessage() {
+  return { draftKey, ...collectMessage() };
+}
+
+function draftFingerprint() {
+  return JSON.stringify({
+    to: $("to").value,
+    cc: $("cc").value,
+    bcc: $("bcc").value,
+    subject: $("subject").value,
+    htmlBody: editor.innerHTML,
+    attachments: selectedAttachments.map(f => [f.name, f.size, f.lastModified || 0])
+  });
+}
+
+function scheduleDraftSave() {
+  if (messageWasSent) return;
+  if (draftTimer) clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraftNow, DRAFT_SAVE_DELAY_MS);
+}
+
+async function saveDraftNow() {
+  if (messageWasSent) return;
+  if (draftTimer) {
+    clearTimeout(draftTimer);
+    draftTimer = null;
+  }
+  const fp = draftFingerprint();
+  if (fp === lastDraftFingerprint) return;
+  try {
+    await browser.runtime.sendMessage({ type: "save-imported-draft", ...collectDraftMessage() });
+    lastDraftFingerprint = fp;
+    setStatus("Brouillon sauvegardé.");
+  } catch (e) {
+    setStatus(msg("genericError", ["Sauvegarde brouillon : " + String(e && e.message ? e.message : e)]));
+  }
+}
+
+async function deleteDraftNow() {
+  messageWasSent = true;
+  if (draftTimer) {
+    clearTimeout(draftTimer);
+    draftTimer = null;
+  }
+  try {
+    await browser.runtime.sendMessage({ type: "delete-imported-draft", draftKey, composeMode, sourceMessageId });
+  } catch (e) {}
+}
+
+function setupDraftAutosave() {
+  ["to", "cc", "bcc", "subject"].forEach(id => $(id).addEventListener("input", scheduleDraftSave));
+  editor.addEventListener("input", scheduleDraftSave);
+  window.addEventListener("beforeunload", () => {
+    // Best effort: the periodic save is the reliable part. This only tries to catch normal tab closing.
+    saveDraftNow();
+  });
 }
 
 function resetForm() {
@@ -396,6 +462,7 @@ $("sendDirect").addEventListener("click", async () => {
   try {
     setStatus(msg("sendingStatus"));
     await browser.runtime.sendMessage({ type: "send-direct", ...collectMessage() });
+    await deleteDraftNow();
     setStatus(msg("sentStatus"));
     resetForm();
   } catch (e) {
@@ -406,7 +473,7 @@ $("sendDirect").addEventListener("click", async () => {
   }
 });
 
-$("reset").addEventListener("click", resetForm);
+$("reset").addEventListener("click", async () => { await deleteDraftNow(); resetForm(); messageWasSent = false; draftKey = `compose-tab-${Date.now()}-${Math.random().toString(16).slice(2)}`; lastDraftFingerprint = ""; });
 async function applyStartupContext() {
   const params = new URLSearchParams(location.search);
   const mode = params.get("mode") || "new";
@@ -417,16 +484,22 @@ async function applyStartupContext() {
     const ctx = await browser.runtime.sendMessage({ type: "get-message-compose-context", mode, messageId });
     composeMode = ctx.mode || mode;
     sourceMessageId = ctx.sourceMessageId || messageId;
+    if (ctx.draftKey) draftKey = ctx.draftKey;
     $("to").value = ctx.to || "";
     $("cc").value = ctx.cc || "";
     $("bcc").value = ctx.bcc || "";
     $("subject").value = ctx.subject || "";
+    if (composeMode === "draft") {
+      editor.innerHTML = ctx.bodyHtml || "";
+      if (!htmlToPlainText(editor.innerHTML).trim()) applyDefaultSignature();
+      lastDraftFingerprint = draftFingerprint();
+    }
     if (composeMode === "reply" || composeMode === "replyAll") applyReplyOrReplyAllBody(ctx);
     if (composeMode === "forward") {
       applyForwardBody(ctx);
       await addOriginalAttachments(sourceMessageId);
     }
-    const title = composeMode === "forward" ? "Transférer" : (composeMode === "replyAll" ? "Répondre à tous" : "Répondre");
+    const title = composeMode === "draft" ? msg("editDraftTitle") : (composeMode === "forward" ? msg("forwardTitle") : (composeMode === "replyAll" ? msg("replyAllTitle") : msg("replyTitle")));
     const h1 = document.querySelector("header h1");
     if (h1) h1.textContent = title;
     document.title = title;
@@ -436,5 +509,6 @@ async function applyStartupContext() {
   }
 }
 
+setupDraftAutosave();
 loadContacts();
 applyStartupContext();

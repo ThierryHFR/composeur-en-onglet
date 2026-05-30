@@ -217,5 +217,50 @@
   },
   "attachmentSize": {
     "message": "$1 ($2 KB)"
+  },
+  "messageActionTitle": {
+    "message": "Antworten / Weiterleiten"
+  },
+  "replyButton": {
+    "message": "↩ Antworten"
+  },
+  "replyAllButton": {
+    "message": "↪ Allen antworten"
+  },
+  "forwardButton": {
+    "message": "⇥ Weiterleiten"
+  },
+  "noMessageSelected": {
+    "message": "Keine Nachricht ausgewählt."
+  },
+  "replyTitle": {
+    "message": "Antworten"
+  },
+  "replyAllTitle": {
+    "message": "Allen antworten"
+  },
+  "forwardTitle": {
+    "message": "Weiterleiten"
+  },
+  "optionsTitle": {
+    "message": "Optionen"
+  },
+  "singleComposeTabLabel": {
+    "message": "Immer nur einen Verfassen-Tab verwenden"
+  },
+  "singleComposeTabHelp": {
+    "message": "Wenn diese Option aktiviert ist, verwendet die Erweiterung den bereits geöffneten Verfassen-Tab erneut. Wenn sie deaktiviert ist, wird jede neue Nachricht in einem neuen Tab geöffnet."
+  },
+  "optionsSaved": {
+    "message": "Option gespeichert."
+  },
+  "editDraftButton": {
+    "message": "✎ Im Tab-Verfasser bearbeiten"
+  },
+  "editDraftTitle": {
+    "message": "Entwurf bearbeiten"
+  },
+  "editDraftShortTitle": {
+    "message": "Entwurf bearbeiten"
   }
 }

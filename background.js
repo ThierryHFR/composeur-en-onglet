@@ -1,6 +1,33 @@
 
+async function getSingleComposeTabSetting() {
+  try {
+    const stored = await browser.storage.local.get({ singleComposeTab: false });
+    return stored.singleComposeTab === true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function focusOrOpenComposeTab(params = {}) {
+  const baseUrl = browser.runtime.getURL("compose-tab.html");
+  const qs = encodeParams(params);
+  const url = qs ? baseUrl + "?" + qs : baseUrl;
+
+  if (await getSingleComposeTabSetting()) {
+    const existing = await browser.tabs.query({ url: baseUrl + "*" });
+    if (existing && existing.length) {
+      const tab = existing[0];
+      await browser.tabs.update(tab.id, { active: true, url });
+      if (tab.windowId) await browser.windows.update(tab.windowId, { focused: true });
+      return tab;
+    }
+  }
+
+  return await browser.tabs.create({ url });
+}
+
 async function openComposeTab() {
-  await browser.tabs.create({ url: browser.runtime.getURL("compose-tab.html") });
+  await focusOrOpenComposeTab();
 }
 
 browser.browserAction.onClicked.addListener(openComposeTab);
@@ -175,8 +202,7 @@ function encodeParams(params) {
 }
 
 async function openMessageComposeTab(message) {
-  const url = browser.runtime.getURL("compose-tab.html") + "?" + encodeParams({ mode: message.mode, messageId: message.messageId });
-  await browser.tabs.create({ url });
+  return await focusOrOpenComposeTab({ mode: message.mode, messageId: message.messageId });
 }
 
 function cleanSubject(subject, prefix) {
@@ -225,6 +251,30 @@ async function getOriginalMessageBodyHtml(id) {
   return "";
 }
 
+
+function headerValueFromFull(full, name) {
+  const wanted = String(name || "").toLowerCase();
+  const headers = full && full.headers ? full.headers : null;
+  if (!headers) return "";
+  if (Array.isArray(headers)) {
+    const found = headers.find(h => String(h.name || "").toLowerCase() === wanted);
+    return found ? String(found.value || "") : "";
+  }
+  const value = headers[name] || headers[wanted] || headers[name.toLowerCase()] || headers[name.toUpperCase()];
+  if (Array.isArray(value)) return value.join(", ");
+  return value ? String(value) : "";
+}
+
+async function getMessageHeaderValue(id, name) {
+  try {
+    if (!browser.messages || !browser.messages.getFull) return "";
+    const full = await browser.messages.getFull(id);
+    return headerValueFromFull(full, name);
+  } catch (e) {
+    return "";
+  }
+}
+
 function formatReplyDate(dateValue) {
   const d = dateValue ? new Date(dateValue) : new Date();
   if (isNaN(d.getTime())) return "";
@@ -270,6 +320,21 @@ async function getMessageComposeContext(message) {
   const originalBodyHtml = await getOriginalMessageBodyHtml(id);
   const replyHeader = `Le ${formatReplyDate(m.date)}, ${formatReplyAuthor(author)} a écrit :`;
   const replyPosition = await getReplyPosition();
+
+  if (mode === "draft") {
+    const bcc = await getMessageHeaderValue(id, "Bcc");
+    return {
+      mode: "draft",
+      sourceMessageId: id,
+      draftKey: `draft-${id}`,
+      to: recipients.join(", "),
+      cc: ccList.join(", "),
+      bcc,
+      subject: m.subject || "",
+      bodyHtml: originalBodyHtml || ""
+    };
+  }
+
   if (mode === "forward") {
     return {
       mode,
@@ -297,6 +362,384 @@ async function getMessageComposeContext(message) {
   return { mode: "reply", sourceMessageId: id, to: author, cc: "", bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition };
 }
 
+
+// --- True Thunderbird drafts for TB 140+ (no native compose window) ---
+const AUTO_DRAFTS = new Map();
+
+function randomToken() {
+  const a = new Uint32Array(4);
+  crypto.getRandomValues(a);
+  return Array.from(a, n => n.toString(16).padStart(8, "0")).join("");
+}
+
+function foldHeaderLine(name, value) {
+  const raw = `${name}: ${String(value || "")}`.replace(/\r?\n/g, " ");
+  if (raw.length <= 76) return raw;
+  const parts = [];
+  let line = raw;
+  while (line.length > 76) {
+    let cut = line.lastIndexOf(" ", 76);
+    if (cut < name.length + 2) cut = 76;
+    parts.push(line.slice(0, cut));
+    line = " " + line.slice(cut).trimStart();
+  }
+  parts.push(line);
+  return parts.join("\r\n");
+}
+
+function encodeMimeHeader(value) {
+  const text = String(value || "");
+  if (!/[^\x00-\x7F]/.test(text)) return text.replace(/\r?\n/g, " ");
+  const bytes = new TextEncoder().encode(text);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return `=?UTF-8?B?${btoa(binary)}?=`;
+}
+
+function htmlToPlainForMime(html) {
+  return String(html || "")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p\s*>/gi, "\n")
+    .replace(/<\/div\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .trim();
+}
+
+function normalizeNewlines(value) {
+  return String(value || "").replace(/\r?\n/g, "\r\n");
+}
+
+function quotedPrintableUtf8(value) {
+  const bytes = new TextEncoder().encode(normalizeNewlines(value));
+  let line = "";
+  const out = [];
+  const hex = n => n.toString(16).toUpperCase().padStart(2, "0");
+  function push(chunk) {
+    if (line.length + chunk.length > 73) {
+      out.push(line + "=");
+      line = "";
+    }
+    line += chunk;
+  }
+  for (let i = 0; i < bytes.length; i++) {
+    const b = bytes[i];
+    if (b === 13 && bytes[i + 1] === 10) {
+      out.push(line);
+      line = "";
+      i++;
+      continue;
+    }
+    if ((b >= 33 && b <= 60) || (b >= 62 && b <= 126)) push(String.fromCharCode(b));
+    else if (b === 9 || b === 32) {
+      const next = bytes[i + 1];
+      if (next === 13 || next === 10 || i === bytes.length - 1) push("=" + hex(b));
+      else push(String.fromCharCode(b));
+    } else {
+      push("=" + hex(b));
+    }
+  }
+  out.push(line);
+  return out.join("\r\n");
+}
+
+async function fileToBase64Lines(file) {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.slice(i, i + chunk));
+  }
+  return btoa(binary).replace(/.{1,76}/g, "$&\r\n").trimEnd();
+}
+
+function cleanMimeFilename(name) {
+  return String(name || "attachment").replace(/[\r\n"]/g, "_");
+}
+
+function shouldSaveDraftMessage(message) {
+  const body = htmlToPlainForMime(message.htmlBody || "").replace(/--\s*Ma signature\s*$/i, "").trim();
+  return Boolean(
+    String(message.to || "").trim() ||
+    String(message.cc || "").trim() ||
+    String(message.bcc || "").trim() ||
+    String(message.subject || "").trim() ||
+    body ||
+    (Array.isArray(message.attachments) && message.attachments.length)
+  );
+}
+
+async function getDefaultIdentityAndAccount(preferredAccountId) {
+  const accounts = await browser.accounts.list(true);
+  let account = null;
+  if (preferredAccountId) account = accounts.find(a => a.id === preferredAccountId) || null;
+  if (!account) {
+    try { account = await browser.accounts.getDefault(true); } catch (e) {}
+  }
+  if (!account) account = (accounts || []).find(a => (a.identities || []).length) || (accounts || [])[0];
+  const identity = account && account.identities && account.identities[0] ? account.identities[0] : null;
+  return { account, identity, accounts };
+}
+
+function findFolderRecursive(folder, predicate) {
+  if (!folder) return null;
+  if (predicate(folder)) return folder;
+  for (const child of (folder.subFolders || [])) {
+    const found = findFolderRecursive(child, predicate);
+    if (found) return found;
+  }
+  return null;
+}
+
+async function getPreferredAccountIdFromSource(message) {
+  try {
+    if (!message.sourceMessageId || !browser.messages || !browser.messages.get) return null;
+    const src = await browser.messages.get(Number(message.sourceMessageId));
+    return src && src.folder && src.folder.accountId ? src.folder.accountId : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function findDraftsFolder(message) {
+  const preferredAccountId = await getPreferredAccountIdFromSource(message);
+  const { account, identity, accounts } = await getDefaultIdentityAndAccount(preferredAccountId);
+  const accountOrder = [account, ...(accounts || []).filter(a => !account || a.id !== account.id)].filter(Boolean);
+
+  for (const acc of accountOrder) {
+    const special = findFolderRecursive(acc.rootFolder, f => Array.isArray(f.specialUse) && f.specialUse.includes("drafts"));
+    if (special) return { folder: special, identity: (acc.identities || [])[0] || identity };
+  }
+
+  for (const acc of accountOrder) {
+    const named = findFolderRecursive(acc.rootFolder, f => /^(drafts|brouillons)$/i.test(String(f.name || "")) || /(^|\/)(Drafts|Brouillons)$/i.test(String(f.path || "")));
+    if (named) return { folder: named, identity: (acc.identities || [])[0] || identity };
+  }
+
+  throw new Error("Dossier Brouillons introuvable pour les comptes Thunderbird.");
+}
+
+async function buildDraftMimeFile(message, state, identity) {
+  const messageId = state.messageId || `<compose-tab-${randomToken()}@composeur-en-onglet.local>`;
+  state.messageId = messageId;
+  const fromEmail = identity && identity.email ? identity.email : "";
+  const fromName = identity && identity.name ? identity.name : "";
+  const from = fromEmail ? (fromName ? `${encodeMimeHeader(fromName)} <${fromEmail}>` : fromEmail) : "undisclosed-sender:;";
+  const subject = String(message.subject || "").trim() || "(sans sujet)";
+  const html = `<!doctype html><html><body>${message.htmlBody || ""}</body></html>`;
+  const plain = htmlToPlainForMime(message.htmlBody || "");
+  const altBoundary = `alt_${randomToken()}`;
+  const mixedBoundary = `mixed_${randomToken()}`;
+  const attachments = Array.isArray(message.attachments) ? message.attachments : [];
+
+  const headers = [
+    foldHeaderLine("From", from),
+    message.to ? foldHeaderLine("To", message.to) : "To: undisclosed-recipients:;",
+    message.cc ? foldHeaderLine("Cc", message.cc) : null,
+    message.bcc ? foldHeaderLine("Bcc", message.bcc) : null,
+    foldHeaderLine("Subject", encodeMimeHeader(subject)),
+    `Date: ${new Date().toUTCString()}`,
+    `Message-ID: ${messageId}`,
+    "MIME-Version: 1.0",
+    "X-Mozilla-Draft-Info: internal/draft; vcard=0; receipt=0; DSN=0; uuencode=0; attachmentreminder=0"
+  ].filter(Boolean);
+
+  let alt = "";
+  alt += `Content-Type: multipart/alternative; boundary="${altBoundary}"\r\n\r\n`;
+  alt += `--${altBoundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n${quotedPrintableUtf8(plain)}\r\n`;
+  alt += `--${altBoundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n${quotedPrintableUtf8(html)}\r\n`;
+  alt += `--${altBoundary}--\r\n`;
+
+  let raw = "";
+  if (attachments.length) {
+    raw = headers.concat([`Content-Type: multipart/mixed; boundary="${mixedBoundary}"`]).join("\r\n") + "\r\n\r\n";
+    raw += `--${mixedBoundary}\r\n${alt}\r\n`;
+    for (const att of attachments) {
+      const file = att && att.file ? att.file : att;
+      if (!file || !file.arrayBuffer) continue;
+      const name = cleanMimeFilename(att.name || file.name || "attachment");
+      const type = file.type || "application/octet-stream";
+      raw += `--${mixedBoundary}\r\n`;
+      raw += `Content-Type: ${type}; name="${name}"\r\n`;
+      raw += `Content-Disposition: attachment; filename="${name}"\r\n`;
+      raw += "Content-Transfer-Encoding: base64\r\n\r\n";
+      raw += await fileToBase64Lines(file);
+      raw += "\r\n";
+    }
+    raw += `--${mixedBoundary}--\r\n`;
+  } else {
+    raw = headers.join("\r\n") + "\r\n" + alt;
+  }
+
+  return new File([raw], "compose-tab-draft.eml", { type: "message/rfc822" });
+}
+
+async function deleteDraftMessage(messageId) {
+  if (!messageId || !browser.messages || !browser.messages.delete) return;
+  try {
+    await browser.messages.delete([Number(messageId)], { deletePermanently: true });
+  } catch (e1) {
+    try { await browser.messages.delete([Number(messageId)]); } catch (e2) {}
+  }
+}
+
+async function saveImportedDraft(message) {
+  if (!shouldSaveDraftMessage(message)) {
+    await deleteImportedDraft(message);
+    return { ok: true, empty: true };
+  }
+  if (!browser.messages || !browser.messages.import) {
+    throw new Error("messages.import indisponible. Thunderbird 140 ou supérieur est requis.");
+  }
+  const key = message.draftKey || "default";
+  const state = AUTO_DRAFTS.get(key) || {};
+  const { folder, identity } = await findDraftsFolder(message);
+  const file = await buildDraftMimeFile(message, state, identity);
+
+  // The import API rejects duplicate Message-ID values in the destination folder.
+  // Replacing the previous imported draft keeps a single visible draft.
+  if (state.importedMessageId) await deleteDraftMessage(state.importedMessageId);
+
+  const imported = await browser.messages.import(file, folder, { read: true, new: false });
+  state.importedMessageId = imported && imported.id;
+  state.folderId = folder.id;
+  state.lastSavedAt = Date.now();
+
+  if (message.composeMode === "draft" && message.sourceMessageId && !state.originalDraftDeleted) {
+    const originalId = Number(message.sourceMessageId);
+    if (originalId && originalId !== Number(state.importedMessageId)) {
+      await deleteDraftMessage(originalId);
+    }
+    state.originalDraftDeleted = true;
+  }
+
+  AUTO_DRAFTS.set(key, state);
+  return { ok: true, messageId: state.importedMessageId, lastSavedAt: state.lastSavedAt };
+}
+
+async function deleteImportedDraft(message) {
+  const key = message.draftKey || "default";
+  const state = AUTO_DRAFTS.get(key);
+  if (state && state.importedMessageId) await deleteDraftMessage(state.importedMessageId);
+  if (message && message.composeMode === "draft" && message.sourceMessageId && !(state && state.originalDraftDeleted)) {
+    await deleteDraftMessage(Number(message.sourceMessageId));
+  }
+  AUTO_DRAFTS.delete(key);
+  return { ok: true };
+}
+
+
+
+// --- Draft context menu: open a Thunderbird draft in the tab composer ---
+const EDIT_DRAFT_MENU_ID = "open-draft-in-compose-tab";
+
+function isDraftFolderLike(folder) {
+  if (!folder) return false;
+  const specialUse = Array.isArray(folder.specialUse) ? folder.specialUse : [];
+  const name = String(folder.name || "");
+  const path = String(folder.path || "");
+  return specialUse.includes("drafts") || /^(Drafts|Brouillons)$/i.test(name) || /(^|\/)(Drafts|Brouillons)$/i.test(path);
+}
+
+function getFirstMessageFromList(list) {
+  if (!list) return null;
+  if (Array.isArray(list)) return list[0] || null;
+  if (Array.isArray(list.messages)) return list.messages[0] || null;
+  return null;
+}
+
+async function registerDraftContextMenu() {
+  if (!browser.menus || !browser.menus.create) return;
+  try { await browser.menus.remove(EDIT_DRAFT_MENU_ID); } catch (e) {}
+  browser.menus.create({
+    id: EDIT_DRAFT_MENU_ID,
+    title: browser.i18n.getMessage("editDraftButton") || "Modifier dans Composeur en onglet",
+    contexts: ["message_list"],
+    visible: true
+  });
+}
+
+async function updateDraftContextMenu(info) {
+  if (!browser.menus || !browser.menus.update) return;
+  if (!info || !Array.isArray(info.contexts) || !info.contexts.includes("message_list")) return;
+  const message = getFirstMessageFromList(info.selectedMessages);
+  const visible = isDraftFolderLike(message && message.folder);
+  try {
+    await browser.menus.update(EDIT_DRAFT_MENU_ID, { visible, enabled: visible });
+    if (browser.menus.refresh) await browser.menus.refresh();
+  } catch (e) {}
+}
+
+async function openDraftFromContextMenu(info) {
+  if (!info || info.menuItemId !== EDIT_DRAFT_MENU_ID) return;
+  const message = getFirstMessageFromList(info.selectedMessages);
+  if (!message || !message.id) return;
+  await openMessageComposeTab({ mode: "draft", messageId: message.id });
+}
+
+try {
+  registerDraftContextMenu();
+  if (browser.runtime.onInstalled) browser.runtime.onInstalled.addListener(registerDraftContextMenu);
+  if (browser.runtime.onStartup) browser.runtime.onStartup.addListener(registerDraftContextMenu);
+  if (browser.menus && browser.menus.onShown) browser.menus.onShown.addListener(updateDraftContextMenu);
+  if (browser.menus && browser.menus.onClicked) browser.menus.onClicked.addListener(openDraftFromContextMenu);
+} catch (e) {}
+
+
+
+// --- Dynamic message action title ---
+async function updateMessageActionTitleForMessage(tabId, message) {
+  if (!browser.messageDisplayAction || !browser.messageDisplayAction.setTitle) return;
+  const isDraft = isDraftFolderLike(message && message.folder);
+  const title = isDraft
+    ? (browser.i18n.getMessage("editDraftTitle") || "Modifier le brouillon")
+    : (browser.i18n.getMessage("messageActionTitle") || "Répondre / Transférer");
+  try {
+    await browser.messageDisplayAction.setTitle({ tabId, title });
+  } catch (e) {}
+}
+
+async function updateMessageActionTitleForActiveTab() {
+  try {
+    if (!browser.messageDisplay || !browser.tabs) return;
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs && tabs[0] ? tabs[0] : null;
+    if (!tab || tab.id === undefined) return;
+    let message = null;
+    if (browser.messageDisplay.getDisplayedMessage) {
+      message = await browser.messageDisplay.getDisplayedMessage(tab.id);
+    } else if (browser.messageDisplay.getDisplayedMessages) {
+      const list = await browser.messageDisplay.getDisplayedMessages(tab.id);
+      message = getFirstMessageFromList(list);
+    }
+    if (message) await updateMessageActionTitleForMessage(tab.id, message);
+  } catch (e) {}
+}
+
+try {
+  if (browser.messageDisplay && browser.messageDisplay.onMessageDisplayed) {
+    browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
+      updateMessageActionTitleForMessage(tab && tab.id, message);
+    });
+  }
+  if (browser.messageDisplay && browser.messageDisplay.onMessagesDisplayed) {
+    browser.messageDisplay.onMessagesDisplayed.addListener((tab, messages) => {
+      updateMessageActionTitleForMessage(tab && tab.id, getFirstMessageFromList(messages));
+    });
+  }
+  if (browser.tabs && browser.tabs.onActivated) {
+    browser.tabs.onActivated.addListener(updateMessageActionTitleForActiveTab);
+  }
+} catch (e) {}
+
 browser.runtime.onMessage.addListener((message) => {
   if (!message || !message.type) return undefined;
   if (message.type === "get-contacts") return getContacts();
@@ -304,5 +747,7 @@ browser.runtime.onMessage.addListener((message) => {
   if (message.type === "get-message-compose-context") return getMessageComposeContext(message);
   if (message.type === "open-native-compose") return openNativeCompose(message);
   if (message.type === "send-direct") return sendDirect(message);
+  if (message.type === "save-imported-draft") return saveImportedDraft(message);
+  if (message.type === "delete-imported-draft") return deleteImportedDraft(message);
   return undefined;
 });

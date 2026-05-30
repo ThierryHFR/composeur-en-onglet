@@ -217,5 +217,50 @@
   },
   "attachmentSize": {
     "message": "$1 ($2 KB)"
+  },
+  "messageActionTitle": {
+    "message": "Reply / Forward"
+  },
+  "replyButton": {
+    "message": "↩ Reply"
+  },
+  "replyAllButton": {
+    "message": "↪ Reply all"
+  },
+  "forwardButton": {
+    "message": "⇥ Forward"
+  },
+  "noMessageSelected": {
+    "message": "No message selected."
+  },
+  "replyTitle": {
+    "message": "Reply"
+  },
+  "replyAllTitle": {
+    "message": "Reply all"
+  },
+  "forwardTitle": {
+    "message": "Forward"
+  },
+  "optionsTitle": {
+    "message": "Options"
+  },
+  "singleComposeTabLabel": {
+    "message": "Always use one compose tab only"
+  },
+  "singleComposeTabHelp": {
+    "message": "When this option is enabled, the extension reuses the already open compose tab. When disabled, each new message opens a new tab."
+  },
+  "optionsSaved": {
+    "message": "Option saved."
+  },
+  "editDraftButton": {
+    "message": "✎ Edit in Tab Composer"
+  },
+  "editDraftTitle": {
+    "message": "Edit draft"
+  },
+  "editDraftShortTitle": {
+    "message": "Edit draft"
   }
 }

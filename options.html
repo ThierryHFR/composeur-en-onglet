@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="optionsTitle">Options</title>
+  <style>
+    body { font: menu; margin: 16px; max-width: 680px; }
+    h1 { font-size: 1.3em; margin: 0 0 16px; }
+    label { display: flex; gap: 10px; align-items: flex-start; }
+    input { margin-top: 2px; }
+    .help { margin: 8px 0 0 28px; opacity: .75; }
+    #status { margin-top: 14px; min-height: 1.2em; opacity: .85; }
+  </style>
+</head>
+<body>
+  <h1 data-i18n="optionsTitle">Options</h1>
+  <label>
+    <input id="singleComposeTab" type="checkbox">
+    <span data-i18n="singleComposeTabLabel">Toujours utiliser un seul composeur en onglet</span>
+  </label>
+  <p class="help" data-i18n="singleComposeTabHelp">Si cette option est cochée, l’extension réutilise l’onglet composeur déjà ouvert. Si elle est décochée, chaque nouveau message ouvre un nouvel onglet.</p>
+  <div id="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>

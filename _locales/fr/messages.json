@@ -217,5 +217,50 @@
   },
   "attachmentSize": {
     "message": "$1 ($2 Ko)"
+  },
+  "messageActionTitle": {
+    "message": "Répondre / Transférer"
+  },
+  "replyButton": {
+    "message": "↩ Répondre"
+  },
+  "replyAllButton": {
+    "message": "↪ Répondre à tous"
+  },
+  "forwardButton": {
+    "message": "⇥ Transférer"
+  },
+  "noMessageSelected": {
+    "message": "Aucun message sélectionné."
+  },
+  "replyTitle": {
+    "message": "Répondre"
+  },
+  "replyAllTitle": {
+    "message": "Répondre à tous"
+  },
+  "forwardTitle": {
+    "message": "Transférer"
+  },
+  "optionsTitle": {
+    "message": "Options"
+  },
+  "singleComposeTabLabel": {
+    "message": "Toujours utiliser un seul composeur en onglet"
+  },
+  "singleComposeTabHelp": {
+    "message": "Si cette option est cochée, l’extension réutilise l’onglet composeur déjà ouvert. Si elle est décochée, chaque nouveau message ouvre un nouvel onglet."
+  },
+  "optionsSaved": {
+    "message": "Option enregistrée."
+  },
+  "editDraftButton": {
+    "message": "✎ Modifier dans Composeur en onglet"
+  },
+  "editDraftTitle": {
+    "message": "Modifier le brouillon"
+  },
+  "editDraftShortTitle": {
+    "message": "Modifier le brouillon"
   }
 }
