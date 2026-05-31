@@ -47,17 +47,32 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function parseHtmlDocument(html) {
+  return new DOMParser().parseFromString(String(html || ""), "text/html");
+}
+
+function serializeNodes(nodes) {
+  const container = document.createElement("div");
+  for (const node of nodes) {
+    container.appendChild(document.importNode(node, true));
+  }
+  return container.getHTML ? container.getHTML() : Array.from(container.childNodes).map(node => new XMLSerializer().serializeToString(node)).join("");
+}
+
 function htmlToPlainText(html) {
-  const tmp = document.createElement("div");
-  tmp.innerHTML = String(html || "");
-  return (tmp.innerText || tmp.textContent || "").replace(/\u00a0/g, " ").trimEnd();
+  const doc = parseHtmlDocument(html);
+  const source = doc.body || doc.documentElement;
+  return (source.innerText || source.textContent || "").replace(/\u00a0/g, " ").trimEnd();
 }
 
 function extractHtmlBody(html) {
-  const tmp = document.createElement("div");
-  tmp.innerHTML = String(html || "");
-  const body = tmp.querySelector("body");
-  return body ? body.innerHTML : tmp.innerHTML;
+  const doc = parseHtmlDocument(html);
+  return serializeNodes(doc.body ? doc.body.childNodes : doc.childNodes);
+}
+
+function setHtmlContent(element, html) {
+  const doc = parseHtmlDocument(html);
+  element.replaceChildren(...Array.from(doc.body.childNodes).map(node => document.importNode(node, true)));
 }
 
 function quoteOriginalMessage(html) {
@@ -88,12 +103,12 @@ function applyReplyOrReplyAllBody(ctx) {
   const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
 
   if (replyPosition === "below") {
-    editor.innerHTML = `<div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div>${signatureBlockHtml()}<div><br></div>`;
+    setHtmlContent(editor, `<div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div>${signatureBlockHtml()}<div><br></div>`);
     setEditorCursor(editor.lastChild, true);
     return;
   }
 
-  editor.innerHTML = `<div><br></div><div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div>${signatureBlockHtml()}`;
+  setHtmlContent(editor, `<div><br></div><div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div>${signatureBlockHtml()}`);
   setEditorCursor(editor.firstChild, false);
 }
 
@@ -118,12 +133,12 @@ function applyForwardBody(ctx) {
   const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
 
   if (replyPosition === "below") {
-    editor.innerHTML = `${forwardedMessage}<div><br></div>${signatureBlockHtml()}<div><br></div>`;
+    setHtmlContent(editor, `${forwardedMessage}<div><br></div>${signatureBlockHtml()}<div><br></div>`);
     setEditorCursor(editor.lastChild, true);
     return;
   }
 
-  editor.innerHTML = `<div><br></div>${signatureBlockHtml()}<div><br></div>${forwardedMessage}`;
+  setHtmlContent(editor, `<div><br></div>${signatureBlockHtml()}<div><br></div>${forwardedMessage}`);
   setEditorCursor(editor.firstChild, false);
 }
 
@@ -157,7 +172,7 @@ async function loadDefaultSignature(messageId = null) {
 }
 
 function applyDefaultSignature() {
-  editor.innerHTML = `<div><br></div>${signatureBlockHtml()}`;
+  setHtmlContent(editor, `<div><br></div>${signatureBlockHtml()}`);
   const range = document.createRange();
   const sel = window.getSelection();
   range.setStart(editor.firstChild, 0);
@@ -505,7 +520,7 @@ async function applyStartupContext() {
     $("bcc").value = ctx.bcc || "";
     $("subject").value = ctx.subject || "";
     if (composeMode === "draft") {
-      editor.innerHTML = ctx.bodyHtml || "";
+      setHtmlContent(editor, ctx.bodyHtml || "");
       if (!htmlToPlainText(editor.innerHTML).trim()) applyDefaultSignature();
       lastDraftFingerprint = draftFingerprint();
     }
