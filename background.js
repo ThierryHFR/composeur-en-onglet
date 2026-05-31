@@ -466,7 +466,8 @@ function cleanMimeFilename(name) {
 }
 
 function shouldSaveDraftMessage(message) {
-  const body = htmlToPlainForMime(message.htmlBody || "").replace(/--\s*Ma signature\s*$/i, "").trim();
+  const bodyHtmlWithoutSignature = String(message.htmlBody || "").replace(/<div[^>]*class=["'][^"']*moz-signature[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+  const body = htmlToPlainForMime(bodyHtmlWithoutSignature).trim();
   return Boolean(
     String(message.to || "").trim() ||
     String(message.cc || "").trim() ||
@@ -485,7 +486,11 @@ async function getDefaultIdentityAndAccount(preferredAccountId) {
     try { account = await browser.accounts.getDefault(true); } catch (e) {}
   }
   if (!account) account = (accounts || []).find(a => (a.identities || []).length) || (accounts || [])[0];
-  const identity = account && account.identities && account.identities[0] ? account.identities[0] : null;
+  let identity = null;
+  if (account && browser.identities && browser.identities.getDefault) {
+    try { identity = await browser.identities.getDefault(account.id); } catch (e) {}
+  }
+  if (!identity) identity = account && account.identities && account.identities[0] ? account.identities[0] : null;
   return { account, identity, accounts };
 }
 
@@ -525,6 +530,33 @@ async function findDraftsFolder(message) {
   }
 
   throw new Error("Dossier Brouillons introuvable pour les comptes Thunderbird.");
+}
+
+function buildIdentitySignatureHtml(identity) {
+  if (!identity || !identity.signature) return "";
+  const raw = String(identity.signature || "").trim();
+  if (!raw) return "";
+
+  const content = identity.signatureIsPlainText
+    ? plainTextToHtml(raw)
+    : raw;
+
+  const plain = htmlToPlainForMime(content).trim();
+  if (!plain) return "";
+  const hasDelimiter = /^--\s*(\r?\n|$)/.test(plain);
+  return hasDelimiter
+    ? `<div class="moz-signature">${content}</div>`
+    : `<div class="moz-signature">-- <br>${content}</div>`;
+}
+
+async function getDefaultSignature(message = {}) {
+  try {
+    const preferredAccountId = await getPreferredAccountIdFromSource(message);
+    const { identity } = await getDefaultIdentityAndAccount(preferredAccountId);
+    return { ok: true, signatureHtml: buildIdentitySignatureHtml(identity), identityId: identity && identity.id };
+  } catch (e) {
+    return { ok: false, signatureHtml: "", error: String(e && e.message ? e.message : e) };
+  }
 }
 
 async function buildDraftMimeFile(message, state, identity) {
@@ -749,5 +781,6 @@ browser.runtime.onMessage.addListener((message) => {
   if (message.type === "send-direct") return sendDirect(message);
   if (message.type === "save-imported-draft") return saveImportedDraft(message);
   if (message.type === "delete-imported-draft") return deleteImportedDraft(message);
+  if (message.type === "get-default-signature") return getDefaultSignature(message);
   return undefined;
 });
