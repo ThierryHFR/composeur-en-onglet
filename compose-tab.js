@@ -32,6 +32,7 @@ let draftKey = `compose-tab-${Date.now()}-${Math.random().toString(16).slice(2)}
 let draftTimer = null;
 let lastDraftFingerprint = "";
 let messageWasSent = false;
+let currentSignatureHtml = "";
 const DRAFT_SAVE_DELAY_MS = 30000;
 const $ = id => document.getElementById(id);
 const editor = $("editor");
@@ -87,12 +88,12 @@ function applyReplyOrReplyAllBody(ctx) {
   const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
 
   if (replyPosition === "below") {
-    editor.innerHTML = `<div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div><div>-- <br>Ma signature</div><div><br></div>`;
+    editor.innerHTML = `<div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div>${signatureBlockHtml()}<div><br></div>`;
     setEditorCursor(editor.lastChild, true);
     return;
   }
 
-  editor.innerHTML = `<div><br></div><div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div><div>-- <br>Ma signature</div>`;
+  editor.innerHTML = `<div><br></div><div>${escapeHtml(header)}</div>${quotedOriginal}<div><br></div>${signatureBlockHtml()}`;
   setEditorCursor(editor.firstChild, false);
 }
 
@@ -117,12 +118,12 @@ function applyForwardBody(ctx) {
   const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
 
   if (replyPosition === "below") {
-    editor.innerHTML = `${forwardedMessage}<div><br></div><div>-- <br>Ma signature</div><div><br></div>`;
+    editor.innerHTML = `${forwardedMessage}<div><br></div>${signatureBlockHtml()}<div><br></div>`;
     setEditorCursor(editor.lastChild, true);
     return;
   }
 
-  editor.innerHTML = `<div><br></div><div>-- <br>Ma signature</div><div><br></div>${forwardedMessage}`;
+  editor.innerHTML = `<div><br></div>${signatureBlockHtml()}<div><br></div>${forwardedMessage}`;
   setEditorCursor(editor.firstChild, false);
 }
 
@@ -142,8 +143,21 @@ async function addOriginalAttachments(messageId) {
   }
 }
 
+function signatureBlockHtml() {
+  return currentSignatureHtml || "";
+}
+
+async function loadDefaultSignature(messageId = null) {
+  try {
+    const res = await browser.runtime.sendMessage({ type: "get-default-signature", sourceMessageId: messageId });
+    currentSignatureHtml = res && res.signatureHtml ? res.signatureHtml : "";
+  } catch (e) {
+    currentSignatureHtml = "";
+  }
+}
+
 function applyDefaultSignature() {
-  editor.innerHTML = "<div><br></div><div>-- <br>Ma signature</div>";
+  editor.innerHTML = `<div><br></div>${signatureBlockHtml()}`;
   const range = document.createRange();
   const sel = window.getSelection();
   range.setStart(editor.firstChild, 0);
@@ -478,6 +492,7 @@ async function applyStartupContext() {
   const params = new URLSearchParams(location.search);
   const mode = params.get("mode") || "new";
   const messageId = params.get("messageId");
+  await loadDefaultSignature(messageId);
   applyDefaultSignature();
   if (!messageId || mode === "new") return;
   try {
