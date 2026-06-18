@@ -289,18 +289,8 @@ function formatReplyAuthor(author) {
 }
 
 async function getReplyPosition() {
-  // Thunderbird stores the reply position as an integer preference:
-  // 1 = reply above the quoted message, 0 = reply below it.
-  // Some installations/extensions expose this through LegacyPrefs.
-  // If it is not available, keep the current extension behavior: above.
-  try {
-    if (browser.LegacyPrefs && browser.LegacyPrefs.getPref) {
-      const value = await browser.LegacyPrefs.getPref("mail.identity.default.reply_on_top");
-      if (String(value) === "0") return "below";
-      if (String(value) === "1") return "above";
-    }
-  } catch (e) {}
-
+  // Thunderbird 140+ ne donne pas acces directement a cette preference.
+  // On utilise uniquement l'option locale de l'extension.
   try {
     const stored = await browser.storage.local.get("replyPosition");
     if (stored && stored.replyPosition === "below") return "below";
