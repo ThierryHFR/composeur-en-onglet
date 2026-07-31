@@ -62,12 +62,27 @@
       <button id="unlinkBtn" data-i18n="unlinkButton" style="display: none;">Supprimer lien</button>
       <button id="imageUrlBtn" data-i18n="imageUrlButton" style="display: none;">Image URL</button>
       <button id="imageFileBtn"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M2 3h12v10H2V3zm1 1v8h10V4H3zm2 5 2-2 2 2 1-1 2 3H4l1-2zm6-4.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg></button>
-      <button id="emojiToggle" style="display: none;">Émoticônes</button>
+      <div class="emojiPicker">
+        <button
+          id="emojiToggle"
+          type="button"
+          data-i18n-title="emojiButton"
+          data-i18n-aria-label="emojiButton"
+          title="Émoticônes"
+          aria-label="Émoticônes"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="emojiPanel"
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <path fill="currentColor" d="M8 1.5A6.5 6.5 0 1 0 8 14.5 6.5 6.5 0 0 0 8 1.5zm0 1A5.5 5.5 0 1 1 8 13.5 5.5 5.5 0 0 1 8 2.5zM5.5 5.25a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm5 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM4.75 9h1a2.25 2.25 0 0 0 4.5 0h1a3.25 3.25 0 0 1-6.5 0z"/>
+          </svg>
+        </button>
+        <div id="emojiPanel" class="emojiPanel" role="toolbar" hidden></div>
+      </div>
       <button id="clearFormatBtn"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M10.8 2 14 5.2 7.2 12H14v1H5.8L2 9.2 10.8 2zM3.4 9.2 6.2 12l6.4-6.8-1.8-1.8-7.4 5.8z"/></svg></button>
       <input id="inlineImageFile" type="file" accept="image/*" hidden>
     </section>
-
-    <section id="emojiPanel" class="emojiPanel" hidden></section>
 
     <div id="editor" contenteditable="true" spellcheck="true" data-i18n-aria-label="bodyAria" aria-label="Corps du message"></div>
 
