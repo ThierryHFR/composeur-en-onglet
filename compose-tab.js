@@ -36,6 +36,7 @@ let currentSignatureHtml = "";
 const DRAFT_SAVE_DELAY_MS = 30000;
 const $ = id => document.getElementById(id);
 const editor = $("editor");
+let editorSelection = null;
 
 
 function escapeHtml(value) {
@@ -187,6 +188,26 @@ for (const el of document.querySelectorAll(".recipient")) {
 
 function setStatus(text) { $("status").textContent = text || ""; }
 function focusEditor() { editor.focus(); }
+
+function rememberEditorSelection() {
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount) return;
+  const range = selection.getRangeAt(0);
+  if (editor.contains(range.commonAncestorContainer)) {
+    editorSelection = range.cloneRange();
+  }
+}
+
+function restoreEditorSelection() {
+  editor.focus();
+  if (!editorSelection || !editor.contains(editorSelection.commonAncestorContainer)) {
+    editorSelection = null;
+    return;
+  }
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(editorSelection);
+}
 
 function exec(cmd, value = null) {
   focusEditor();
@@ -343,14 +364,57 @@ $("inlineImageFile").addEventListener("change", async () => {
 
 const emojis = "😀 😃 😄 😁 😆 😊 🙂 😉 😍 😘 😎 🤔 😅 😂 🤣 😇 🙏 👍 👎 👏 👌 💪 ✅ ❌ ⚠️ 📎 📌 📅 📞 ✉️ ❤️ 💙 ⭐ 🔥 🎉".split(" ");
 const emojiPanel = $("emojiPanel");
+const emojiToggle = $("emojiToggle");
+
+function closeEmojiPanel({ restoreFocus = false } = {}) {
+  if (emojiPanel.hidden) return;
+  emojiPanel.hidden = true;
+  emojiToggle.setAttribute("aria-expanded", "false");
+  if (restoreFocus) {
+    restoreEditorSelection();
+  }
+}
+
 for (const emoji of emojis) {
   const b = document.createElement("button");
   b.type = "button";
   b.textContent = emoji;
-  b.addEventListener("click", () => { exec("insertText", emoji); });
+  b.setAttribute("aria-label", emoji);
+  b.addEventListener("click", () => {
+    restoreEditorSelection();
+    exec("insertText", emoji);
+    rememberEditorSelection();
+    closeEmojiPanel();
+  });
   emojiPanel.appendChild(b);
 }
-$("emojiToggle").addEventListener("click", () => { emojiPanel.hidden = !emojiPanel.hidden; });
+emojiPanel.setAttribute("aria-label", msg("emojiButton"));
+
+editor.addEventListener("keyup", rememberEditorSelection);
+editor.addEventListener("mouseup", rememberEditorSelection);
+editor.addEventListener("input", rememberEditorSelection);
+
+emojiToggle.addEventListener("click", () => {
+  const willOpen = emojiPanel.hidden;
+  if (willOpen) rememberEditorSelection();
+  emojiPanel.hidden = !willOpen;
+  emojiToggle.setAttribute("aria-expanded", String(willOpen));
+  if (willOpen) {
+    const firstEmoji = emojiPanel.querySelector("button");
+    if (firstEmoji) firstEmoji.focus();
+  }
+});
+
+document.addEventListener("click", event => {
+  if (!event.target.closest(".emojiPicker")) closeEmojiPanel();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !emojiPanel.hidden) {
+    event.preventDefault();
+    closeEmojiPanel({ restoreFocus: true });
+  }
+});
 
 function readFileAsDataURL(file) {
   return new Promise((resolve, reject) => {

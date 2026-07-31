@@ -287,21 +287,50 @@ footer button:active {
 
 /* Emojis */
 
+.emojiPicker {
+  position: relative;
+  display: inline-flex;
+}
+
+#emojiToggle[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--tb-button) 65%, var(--tb-accent) 35%);
+}
+
 .emojiPanel {
-  flex: 0 0 auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  padding: 6px;
-  margin: 6px 0;
-  background: var(--tb-bg);
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 34px);
+  gap: 4px;
+  width: max-content;
+  max-width: min(312px, calc(100vw - 24px));
+  max-height: min(250px, calc(100vh - 160px));
+  padding: 8px;
+  overflow: auto;
+  background: var(--tb-window);
+  color: var(--tb-window-text);
   border: 1px solid var(--tb-border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px color-mix(in srgb, #000 28%, transparent);
+}
+
+.emojiPanel[hidden] {
+  display: none;
 }
 
 .emojiPanel button {
   font-size: 18px;
-  min-width: 30px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
   padding: 3px;
+}
+
+.emojiPanel button:focus-visible {
+  outline: 2px solid var(--tb-accent);
+  outline-offset: 1px;
 }
 
 /* Éditeur */
