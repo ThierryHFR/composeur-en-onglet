@@ -440,6 +440,51 @@ function quotedPrintableUtf8(value) {
   return out.join("\r\n");
 }
 
+function decodeDataImageUrl(value) {
+  const match = /^data:(image\/[a-z0-9.+-]+)(?:;[^,]*)?,(.*)$/is.exec(String(value || ""));
+  if (!match) return null;
+
+  const header = String(value).slice(0, String(value).indexOf(","));
+  const payload = match[2];
+  try {
+    if (/;base64/i.test(header)) {
+      const binary = atob(payload.replace(/\s/g, ""));
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return { type: match[1].toLowerCase(), bytes };
+    }
+    const bytes = new TextEncoder().encode(decodeURIComponent(payload));
+    return { type: match[1].toLowerCase(), bytes };
+  } catch (e) {
+    return null;
+  }
+}
+
+function prepareInlineImages(html) {
+  const doc = new DOMParser().parseFromString(String(html || ""), "text/html");
+  const images = [];
+  for (const image of doc.querySelectorAll("img[src]")) {
+    const decoded = decodeDataImageUrl(image.getAttribute("src"));
+    if (!decoded) continue;
+    const contentId = `inline-${randomToken()}@composeur-en-onglet.local`;
+    image.setAttribute("src", `cid:${contentId}`);
+    images.push({ ...decoded, contentId });
+  }
+  return {
+    html: doc.documentElement.outerHTML,
+    images
+  };
+}
+
+function bytesToBase64Lines(bytes) {
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.slice(i, i + chunk));
+  }
+  return btoa(binary).replace(/.{1,76}/g, "$&\r\n").trimEnd();
+}
+
 async function fileToBase64Lines(file) {
   const buf = await file.arrayBuffer();
   const bytes = new Uint8Array(buf);
@@ -532,7 +577,10 @@ function buildIdentitySignatureHtml(identity) {
     : raw;
 
   const plain = htmlToPlainForMime(content).trim();
-  if (!plain) return "";
+  // An HTML signature can consist only of a logo/image. Do not discard it
+  // just because converting it to plain text produces an empty string.
+  const hasImage = /<img\b[^>]*\bsrc\s*=\s*["']data:image\//i.test(content);
+  if (!plain && !hasImage) return "";
   const hasDelimiter = /^--\s*(\r?\n|$)/.test(plain);
   return hasDelimiter
     ? `<div class="moz-signature">${content}</div>`
@@ -556,9 +604,11 @@ async function buildDraftMimeFile(message, state, identity) {
   const fromName = identity && identity.name ? identity.name : "";
   const from = fromEmail ? (fromName ? `${encodeMimeHeader(fromName)} <${fromEmail}>` : fromEmail) : "undisclosed-sender:;";
   const subject = String(message.subject || "").trim() || "(sans sujet)";
-  const html = `<!doctype html><html><body>${message.htmlBody || ""}</body></html>`;
+  const inline = prepareInlineImages(`<!doctype html><html><body>${message.htmlBody || ""}</body></html>`);
+  const html = inline.html;
   const plain = htmlToPlainForMime(message.htmlBody || "");
   const altBoundary = `alt_${randomToken()}`;
+  const relatedBoundary = `related_${randomToken()}`;
   const mixedBoundary = `mixed_${randomToken()}`;
   const attachments = Array.isArray(message.attachments) ? message.attachments : [];
 
@@ -577,7 +627,18 @@ async function buildDraftMimeFile(message, state, identity) {
   let alt = "";
   alt += `Content-Type: multipart/alternative; boundary="${altBoundary}"\r\n\r\n`;
   alt += `--${altBoundary}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n${quotedPrintableUtf8(plain)}\r\n`;
-  alt += `--${altBoundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n${quotedPrintableUtf8(html)}\r\n`;
+  if (inline.images.length) {
+    alt += `--${altBoundary}\r\nContent-Type: multipart/related; boundary="${relatedBoundary}"; type="text/html"\r\n\r\n`;
+    alt += `--${relatedBoundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n${quotedPrintableUtf8(html)}\r\n`;
+    for (const image of inline.images) {
+      alt += `--${relatedBoundary}\r\n`;
+      alt += `Content-Type: ${image.type}\r\nContent-Transfer-Encoding: base64\r\nContent-ID: <${image.contentId}>\r\nContent-Disposition: inline\r\n\r\n`;
+      alt += `${bytesToBase64Lines(image.bytes)}\r\n`;
+    }
+    alt += `--${relatedBoundary}--\r\n`;
+  } else {
+    alt += `--${altBoundary}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n${quotedPrintableUtf8(html)}\r\n`;
+  }
   alt += `--${altBoundary}--\r\n`;
 
   let raw = "";
