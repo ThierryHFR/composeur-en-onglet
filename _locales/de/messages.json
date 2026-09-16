@@ -14,6 +14,18 @@
   "addressBookTitle": {
     "message": "Adressbuch"
   },
+  "showContactsLabel": {
+    "message": "Kontaktliste im Verfasser anzeigen"
+  },
+  "showContactsHelp": {
+    "message": "Legt fest, ob das Adressbuch in Tab-Verfassern angezeigt wird. Die Einstellung kann auch im Verfasser geändert werden."
+  },
+  "hideContacts": {
+    "message": "Kontakte ausblenden"
+  },
+  "showContacts": {
+    "message": "Kontakte anzeigen"
+  },
   "searchContactPlaceholder": {
     "message": "Kontakt suchen"
   },
