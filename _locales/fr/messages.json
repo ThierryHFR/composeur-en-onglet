@@ -14,6 +14,18 @@
   "addressBookTitle": {
     "message": "Carnet d’adresses"
   },
+  "showContactsLabel": {
+    "message": "Afficher la liste des contacts dans le composeur"
+  },
+  "showContactsHelp": {
+    "message": "Cette option contrôle l’affichage du carnet d’adresses dans les composeurs en onglet. Elle peut aussi être modifiée depuis le composeur."
+  },
+  "hideContacts": {
+    "message": "Masquer les contacts"
+  },
+  "showContacts": {
+    "message": "Afficher les contacts"
+  },
   "searchContactPlaceholder": {
     "message": "Rechercher un contact"
   },

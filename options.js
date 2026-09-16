@@ -13,12 +13,16 @@ function applyI18n() {
 }
 
 async function loadOptions() {
-  const stored = await browser.storage.local.get({ singleComposeTab: false });
+  const stored = await browser.storage.local.get({ singleComposeTab: false, showContacts: true });
   document.getElementById("singleComposeTab").checked = stored.singleComposeTab === true;
+  document.getElementById("showContacts").checked = stored.showContacts !== false;
 }
 
 async function saveOptions() {
-  await browser.storage.local.set({ singleComposeTab: document.getElementById("singleComposeTab").checked });
+  await browser.storage.local.set({
+    singleComposeTab: document.getElementById("singleComposeTab").checked,
+    showContacts: document.getElementById("showContacts").checked
+  });
   const status = document.getElementById("status");
   status.textContent = msg("optionsSaved");
   setTimeout(() => { status.textContent = ""; }, 1400);
@@ -27,3 +31,4 @@ async function saveOptions() {
 applyI18n();
 loadOptions();
 document.getElementById("singleComposeTab").addEventListener("change", saveOptions);
+document.getElementById("showContacts").addEventListener("change", saveOptions);

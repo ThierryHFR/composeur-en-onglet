@@ -47,7 +47,21 @@ body {
 }
 
 #contactsPane h2 {
-  display: none;
+  margin: 0;
+  font-size: 1.1em;
+}
+
+.contactsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#toggleContacts {
+  flex: 0 0 auto;
+  padding: 4px 8px;
 }
 
 #contactSearch {

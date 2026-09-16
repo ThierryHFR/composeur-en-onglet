@@ -14,6 +14,18 @@
   "addressBookTitle": {
     "message": "Address book"
   },
+  "showContactsLabel": {
+    "message": "Show the contact list in the composer"
+  },
+  "showContactsHelp": {
+    "message": "Controls whether the address book is shown in tab composers. It can also be changed from the composer."
+  },
+  "hideContacts": {
+    "message": "Hide contacts"
+  },
+  "showContacts": {
+    "message": "Show contacts"
+  },
   "searchContactPlaceholder": {
     "message": "Search a contact"
   },

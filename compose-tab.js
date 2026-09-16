@@ -33,6 +33,7 @@ let draftTimer = null;
 let lastDraftFingerprint = "";
 let messageWasSent = false;
 let currentSignatureHtml = "";
+let showContacts = true;
 const DRAFT_SAVE_DELAY_MS = 30000;
 const $ = id => document.getElementById(id);
 const editor = $("editor");
@@ -188,6 +189,35 @@ for (const el of document.querySelectorAll(".recipient")) {
 
 function setStatus(text) { $("status").textContent = text || ""; }
 function focusEditor() { editor.focus(); }
+
+function applyContactsVisibility() {
+  const pane = $("contactsPane");
+  const toggle = $("toggleContacts");
+  pane.hidden = !showContacts;
+  toggle.textContent = msg(showContacts ? "hideContacts" : "showContacts");
+  toggle.setAttribute("aria-label", msg(showContacts ? "hideContacts" : "showContacts"));
+  toggle.setAttribute("aria-pressed", String(showContacts));
+}
+
+async function loadContactsVisibility() {
+  try {
+    const stored = await browser.storage.local.get({ showContacts: true });
+    showContacts = stored.showContacts !== false;
+  } catch (e) {
+    showContacts = true;
+  }
+  applyContactsVisibility();
+}
+
+$("toggleContacts").addEventListener("click", async () => {
+  showContacts = !showContacts;
+  applyContactsVisibility();
+  try {
+    await browser.storage.local.set({ showContacts });
+  } catch (e) {
+    setStatus(msg("genericError", [String(e && e.message ? e.message : e)]));
+  }
+});
 
 function rememberEditorSelection() {
   const selection = window.getSelection();
@@ -604,5 +634,6 @@ async function applyStartupContext() {
 }
 
 setupDraftAutosave();
+loadContactsVisibility();
 loadContacts();
 applyStartupContext();

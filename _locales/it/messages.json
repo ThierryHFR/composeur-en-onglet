@@ -14,6 +14,18 @@
   "addressBookTitle": {
     "message": "Rubrica"
   },
+  "showContactsLabel": {
+    "message": "Mostra l’elenco dei contatti nel compositore"
+  },
+  "showContactsHelp": {
+    "message": "Controlla la visualizzazione della rubrica nei compositori in scheda. Può essere modificata anche dal compositore."
+  },
+  "hideContacts": {
+    "message": "Nascondi contatti"
+  },
+  "showContacts": {
+    "message": "Mostra contatti"
+  },
   "searchContactPlaceholder": {
     "message": "Cerca un contatto"
   },

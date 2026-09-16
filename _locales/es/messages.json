@@ -14,6 +14,18 @@
   "addressBookTitle": {
     "message": "Libreta de direcciones"
   },
+  "showContactsLabel": {
+    "message": "Mostrar la lista de contactos en el redactor"
+  },
+  "showContactsHelp": {
+    "message": "Controla si se muestra la libreta de direcciones en los redactores en pestaña. También se puede cambiar desde el redactor."
+  },
+  "hideContacts": {
+    "message": "Ocultar contactos"
+  },
+  "showContacts": {
+    "message": "Mostrar contactos"
+  },
   "searchContactPlaceholder": {
     "message": "Buscar un contacto"
   },
