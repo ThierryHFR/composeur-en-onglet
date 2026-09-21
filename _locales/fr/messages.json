@@ -274,5 +274,13 @@
   },
   "editDraftShortTitle": {
     "message": "Modifier le brouillon"
-  }
+  },
+  "sendProgressLabel": { "message": "Progression de l’envoi" },
+  "onboardingTitle": { "message": "Composeur en onglet" },
+  "onboardingDirectSendText": { "message": "Autorisez l’envoi direct pour envoyer les messages depuis le composeur en onglet, sans ouvrir le composeur natif de Thunderbird." },
+  "onboardingFallbackText": { "message": "Si vous refusez, Composeur en onglet continuera d’utiliser le mode d’envoi classique." },
+  "onboardingGrantButton": { "message": "Autoriser l’envoi direct" },
+  "onboardingGranted": { "message": "Envoi direct activé." },
+  "onboardingDenied": { "message": "Permission refusée. L’envoi classique restera disponible." },
+  "onboardingPermissionError": { "message": "Impossible de demander cette permission : $1" }
 }

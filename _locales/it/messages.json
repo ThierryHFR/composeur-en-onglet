@@ -274,5 +274,13 @@
   },
   "editDraftShortTitle": {
     "message": "Modifica bozza"
-  }
+  },
+  "sendProgressLabel": { "message": "Progresso dell’invio" },
+  "onboardingTitle": { "message": "Tab Composer" },
+  "onboardingDirectSendText": { "message": "Consenti l’invio diretto per inviare messaggi dal compositore in scheda senza aprire il compositore nativo di Thunderbird." },
+  "onboardingFallbackText": { "message": "Se rifiuti, Tab Composer continuerà a usare il metodo di invio standard." },
+  "onboardingGrantButton": { "message": "Consenti invio diretto" },
+  "onboardingGranted": { "message": "Invio diretto attivato." },
+  "onboardingDenied": { "message": "Permesso rifiutato. L’invio standard resterà disponibile." },
+  "onboardingPermissionError": { "message": "Impossibile richiedere questo permesso: $1" }
 }

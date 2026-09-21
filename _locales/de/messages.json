@@ -274,5 +274,13 @@
   },
   "editDraftShortTitle": {
     "message": "Entwurf bearbeiten"
-  }
+  },
+  "sendProgressLabel": { "message": "Sendefortschritt" },
+  "onboardingTitle": { "message": "Tab Composer" },
+  "onboardingDirectSendText": { "message": "Erlauben Sie das direkte Senden, um Nachrichten aus dem Tab-Composer zu senden, ohne das native Thunderbird-Verfassen zu öffnen." },
+  "onboardingFallbackText": { "message": "Wenn Sie ablehnen, verwendet Tab Composer weiterhin die normale Versandmethode." },
+  "onboardingGrantButton": { "message": "Direktes Senden erlauben" },
+  "onboardingGranted": { "message": "Direktes Senden aktiviert." },
+  "onboardingDenied": { "message": "Berechtigung abgelehnt. Das normale Senden bleibt verfügbar." },
+  "onboardingPermissionError": { "message": "Berechtigung konnte nicht angefordert werden: $1" }
 }

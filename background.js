@@ -122,6 +122,9 @@ async function buildComposeDetails(message) {
     body: message.htmlBody || "",
     isPlainText: false
   };
+  if (Array.isArray(message.customHeaders) && message.customHeaders.length) {
+    details.customHeaders = message.customHeaders;
+  }
   // Thunderbird expects a list of FileAttachment objects: { file: File, name?: string }.
   // The HTML file picker returns raw File objects; beginNew() rejects them directly.
   if (Array.isArray(message.attachments) && message.attachments.length) {
@@ -157,6 +160,13 @@ async function openNativeCompose(message) {
 async function sendDirect(message) {
   const details = await buildComposeDetails(message);
 
+  // messages.send is optional. Use the direct API only after the user granted
+  // it from the Send button; otherwise keep the compose-based fallback.
+  if (message.useDirectSend && browser.messages && typeof browser.messages.sendMessage === "function") {
+    await browser.messages.sendMessage(details, { mode: "sendNow" });
+    return { ok: true, direct: true };
+  }
+
   // The Thunderbird preference mail.SpellCheckBeforeSend=false must be managed
   // through the Thunderbird configuration editor. The extension no longer modifies it.
 
@@ -189,7 +199,7 @@ async function sendDirect(message) {
     if (composeTab && composeTab.id) await browser.tabs.remove(composeTab.id);
   } catch (e) {}
 
-  return { ok: true };
+  return { ok: true, direct: false };
 }
 
 
@@ -275,6 +285,23 @@ async function getMessageHeaderValue(id, name) {
   }
 }
 
+async function getReplyHeaders(id) {
+  try {
+    if (!browser.messages || !browser.messages.getFull) return [];
+    const full = await browser.messages.getFull(id);
+    const messageId = headerValueFromFull(full, "Message-ID").trim();
+    const previousReferences = headerValueFromFull(full, "References").trim();
+    if (!messageId) return [];
+    const references = [previousReferences, messageId].filter(Boolean).join(" ");
+    return [
+      { name: "In-Reply-To", value: messageId },
+      { name: "References", value: references }
+    ];
+  } catch (e) {
+    return [];
+  }
+}
+
 function formatReplyDate(dateValue) {
   const d = dateValue ? new Date(dateValue) : new Date();
   if (isNaN(d.getTime())) return "";
@@ -347,9 +374,9 @@ async function getMessageComposeContext(message) {
     const toList = uniqueRecipientsExcludingOwn([author, ...recipients], ownEmails);
     const ccFiltered = uniqueRecipientsExcludingOwn(ccList, ownEmails)
       .filter(cc => !toList.map(normalizeEmail).includes(normalizeEmail(cc)));
-    return { mode, sourceMessageId: id, to: toList.join(", "), cc: ccFiltered.join(", "), bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition };
+    return { mode, sourceMessageId: id, to: toList.join(", "), cc: ccFiltered.join(", "), bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition, customHeaders: await getReplyHeaders(id) };
   }
-  return { mode: "reply", sourceMessageId: id, to: author, cc: "", bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition };
+  return { mode: "reply", sourceMessageId: id, to: author, cc: "", bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition, customHeaders: await getReplyHeaders(id) };
 }
 
 
@@ -770,7 +797,15 @@ async function openDraftFromContextMenu(info) {
 
 try {
   registerDraftContextMenu();
-  if (browser.runtime.onInstalled) browser.runtime.onInstalled.addListener(registerDraftContextMenu);
+  if (browser.runtime.onInstalled) {
+    browser.runtime.onInstalled.addListener(registerDraftContextMenu);
+    browser.runtime.onInstalled.addListener(async details => {
+      if (!details || details.reason !== "install") return;
+      try {
+        await browser.tabs.create({ url: browser.runtime.getURL("onboarding.html") });
+      } catch (e) {}
+    });
+  }
   if (browser.runtime.onStartup) browser.runtime.onStartup.addListener(registerDraftContextMenu);
   if (browser.menus && browser.menus.onShown) browser.menus.onShown.addListener(updateDraftContextMenu);
   if (browser.menus && browser.menus.onClicked) browser.menus.onClicked.addListener(openDraftFromContextMenu);

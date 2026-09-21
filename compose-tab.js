@@ -28,6 +28,7 @@ let allContacts = [];
 let selectedAttachments = [];
 let composeMode = "new";
 let sourceMessageId = null;
+let customHeaders = [];
 let draftKey = `compose-tab-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 let draftTimer = null;
 let lastDraftFingerprint = "";
@@ -188,6 +189,19 @@ for (const el of document.querySelectorAll(".recipient")) {
 }
 
 function setStatus(text) { $("status").textContent = text || ""; }
+function setSendProgress(value, visible = true) {
+  const progress = $("sendProgress");
+  if (!progress) return;
+  progress.value = Math.max(0, Math.min(100, value));
+  progress.hidden = !visible;
+}
+async function closeCurrentComposeTab() {
+  try {
+    if (!browser.tabs || !browser.tabs.getCurrent || !browser.tabs.remove) return;
+    const tab = await browser.tabs.getCurrent();
+    if (tab && tab.id !== undefined) await browser.tabs.remove(tab.id);
+  } catch (e) {}
+}
 function focusEditor() { editor.focus(); }
 
 function applyContactsVisibility() {
@@ -486,6 +500,7 @@ function collectMessage() {
     bcc: $("bcc").value,
     subject: $("subject").value,
     htmlBody: editor.innerHTML,
+    customHeaders,
     // beginNew() does not accept File objects directly in attachments.
     attachments: selectedAttachments.map(file => ({ file, name: file.name || msg("attachmentFallbackName") }))
   };
@@ -552,6 +567,7 @@ function setupDraftAutosave() {
 function resetForm() {
   composeMode = "new";
   sourceMessageId = null;
+  customHeaders = [];
   $("to").value = "";
   $("cc").value = "";
   $("bcc").value = "";
@@ -584,8 +600,41 @@ $("sendDirect").addEventListener("click", async () => {
   btn.textContent = msg("sendingButton");
   try {
     setStatus(msg("sendingStatus"));
-    await browser.runtime.sendMessage({ type: "send-direct", ...collectMessage() });
+    setSendProgress(10);
+    let useDirectSend = false;
+    try {
+      const permissionSet = { permissions: ["messages.send"] };
+      const permissionsApis = [];
+      if (browser.permissions && browser.permissions.request) permissionsApis.push(browser.permissions);
+      if (typeof messenger !== "undefined" && messenger.permissions && messenger.permissions.request && !permissionsApis.includes(messenger.permissions)) {
+        permissionsApis.push(messenger.permissions);
+      }
+      for (const permissionsApi of permissionsApis) {
+        try {
+          if (await permissionsApi.request(permissionSet)) {
+            useDirectSend = true;
+            setSendProgress(35);
+            break;
+          }
+        } catch (e) {
+          console.warn("Unable to request optional messages.send permission", e);
+        }
+      }
+    } catch (e) {
+      // The user may decline the optional permission, or the Thunderbird
+      // version may not support runtime permission requests.
+      console.warn("Unable to request optional messages.send permission", e);
+    }
+    if (!useDirectSend) setSendProgress(35);
+    const sendResult = await browser.runtime.sendMessage({ type: "send-direct", useDirectSend, ...collectMessage() });
+    if (sendResult && sendResult.direct) setSendProgress(80);
     await deleteDraftNow();
+    if (sendResult && sendResult.direct) {
+      setSendProgress(100);
+      setStatus(msg("sentStatus"));
+      setTimeout(closeCurrentComposeTab, 250);
+      return;
+    }
     setStatus(msg("sentStatus"));
     resetForm();
   } catch (e) {
@@ -608,6 +657,7 @@ async function applyStartupContext() {
     const ctx = await browser.runtime.sendMessage({ type: "get-message-compose-context", mode, messageId });
     composeMode = ctx.mode || mode;
     sourceMessageId = ctx.sourceMessageId || messageId;
+    customHeaders = Array.isArray(ctx.customHeaders) ? ctx.customHeaders : [];
     if (ctx.draftKey) draftKey = ctx.draftKey;
     $("to").value = ctx.to || "";
     $("cc").value = ctx.cc || "";

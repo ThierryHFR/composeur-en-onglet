@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title data-i18n="onboardingTitle">Tab Composer</title>
+  <style>
+    body { max-width: 680px; margin: 3rem auto; padding: 0 1.5rem; font: 16px sans-serif; line-height: 1.5; }
+    button { padding: .6rem 1rem; font-size: 1rem; }
+    #status { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1 data-i18n="onboardingTitle">Tab Composer</h1>
+  <p data-i18n="onboardingDirectSendText">Autorisez l’envoi direct pour envoyer les messages depuis le composeur en onglet, sans ouvrir le composeur natif de Thunderbird.</p>
+  <p data-i18n="onboardingFallbackText">Si vous refusez, Tab Composer continuera d’utiliser le mode d’envoi classique.</p>
+  <button id="grant" data-i18n="onboardingGrantButton">Autoriser l’envoi direct</button>
+  <p id="status" role="status"></p>
+  <script src="onboarding.js"></script>
+</body>
+</html>
