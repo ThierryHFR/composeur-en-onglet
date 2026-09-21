@@ -274,5 +274,13 @@
   },
   "editDraftShortTitle": {
     "message": "Editar borrador"
-  }
+  },
+  "sendProgressLabel": { "message": "Progreso del envío" },
+  "onboardingTitle": { "message": "Tab Composer" },
+  "onboardingDirectSendText": { "message": "Permite el envío directo para enviar mensajes desde el compositor en pestaña sin abrir el compositor nativo de Thunderbird." },
+  "onboardingFallbackText": { "message": "Si rechazas, Tab Composer seguirá usando el método de envío estándar." },
+  "onboardingGrantButton": { "message": "Permitir envío directo" },
+  "onboardingGranted": { "message": "Envío directo activado." },
+  "onboardingDenied": { "message": "Permiso rechazado. El envío estándar seguirá disponible." },
+  "onboardingPermissionError": { "message": "No se pudo solicitar este permiso: $1" }
 }

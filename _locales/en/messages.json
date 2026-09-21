@@ -274,5 +274,13 @@
   },
   "editDraftShortTitle": {
     "message": "Edit draft"
-  }
+  },
+  "sendProgressLabel": { "message": "Sending progress" },
+  "onboardingTitle": { "message": "Tab Composer" },
+  "onboardingDirectSendText": { "message": "Allow direct sending to send messages from the tab composer without opening Thunderbird’s native composer." },
+  "onboardingFallbackText": { "message": "If you decline, Tab Composer will continue using the standard sending method." },
+  "onboardingGrantButton": { "message": "Allow direct sending" },
+  "onboardingGranted": { "message": "Direct sending enabled." },
+  "onboardingDenied": { "message": "Permission declined. Standard sending will remain available." },
+  "onboardingPermissionError": { "message": "Unable to request this permission: $1" }
 }
