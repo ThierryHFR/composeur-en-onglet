@@ -35,6 +35,8 @@ let lastDraftFingerprint = "";
 let messageWasSent = false;
 let currentSignatureHtml = "";
 let showContacts = true;
+let selectedIdentityId = "";
+let defaultIdentityId = "";
 const DRAFT_SAVE_DELAY_MS = 30000;
 const $ = id => document.getElementById(id);
 const editor = $("editor");
@@ -169,8 +171,35 @@ async function loadDefaultSignature(messageId = null) {
   try {
     const res = await browser.runtime.sendMessage({ type: "get-default-signature", sourceMessageId: messageId });
     currentSignatureHtml = res && res.signatureHtml ? res.signatureHtml : "";
+    if (!selectedIdentityId && res && res.identityId) selectedIdentityId = String(res.identityId);
   } catch (e) {
     currentSignatureHtml = "";
+  }
+}
+
+async function loadIdentityChoices(messageId = null) {
+  const select = $("from");
+  if (!select) return;
+  try {
+    const res = await browser.runtime.sendMessage({ type: "get-compose-identities", sourceMessageId: messageId });
+    defaultIdentityId = res && res.defaultIdentityId ? String(res.defaultIdentityId) : "";
+    select.textContent = "";
+    for (const identity of (res && res.identities) || []) {
+      const option = document.createElement("option");
+      option.value = identity.id;
+      option.textContent = identity.name && identity.email
+        ? `${identity.name} <${identity.email}>`
+        : (identity.email || identity.id);
+      select.appendChild(option);
+    }
+    selectedIdentityId = selectedIdentityId || defaultIdentityId || (select.options[0] && select.options[0].value) || "";
+    select.value = selectedIdentityId;
+    select.addEventListener("change", () => {
+      selectedIdentityId = select.value;
+      scheduleDraftSave();
+    });
+  } catch (e) {
+    select.textContent = "";
   }
 }
 
@@ -499,6 +528,7 @@ function collectMessage() {
     cc: $("cc").value,
     bcc: $("bcc").value,
     subject: $("subject").value,
+    identityId: selectedIdentityId || $("from").value || "",
     htmlBody: editor.innerHTML,
     customHeaders,
     // beginNew() does not accept File objects directly in attachments.
@@ -572,6 +602,8 @@ function resetForm() {
   $("cc").value = "";
   $("bcc").value = "";
   $("subject").value = "";
+  selectedIdentityId = defaultIdentityId;
+  if ($("from")) $("from").value = selectedIdentityId;
   applyDefaultSignature();
   selectedAttachments = [];
   $("attachments").value = "";
@@ -650,6 +682,7 @@ async function applyStartupContext() {
   const params = new URLSearchParams(location.search);
   const mode = params.get("mode") || "new";
   const messageId = params.get("messageId");
+  await loadIdentityChoices(messageId);
   await loadDefaultSignature(messageId);
   applyDefaultSignature();
   if (!messageId || mode === "new") return;

@@ -125,6 +125,7 @@ async function buildComposeDetails(message) {
   if (Array.isArray(message.customHeaders) && message.customHeaders.length) {
     details.customHeaders = message.customHeaders;
   }
+  if (message.identityId) details.identityId = String(message.identityId);
   // Thunderbird expects a list of FileAttachment objects: { file: File, name?: string }.
   // The HTML file picker returns raw File objects; beginNew() rejects them directly.
   if (Array.isArray(message.attachments) && message.attachments.length) {
@@ -157,13 +158,49 @@ async function openNativeCompose(message) {
   // custom editor content with its native forward template.
   return await browser.compose.beginNew(details);
 }
+
+async function canUseDirectMessagesSend() {
+  const messagesApi = (typeof browser !== "undefined" && browser.messages)
+    || (typeof messenger !== "undefined" && messenger.messages);
+  if (!messagesApi || typeof messagesApi.sendMessage !== "function") return false;
+
+  // messages.sendMessage() was introduced in Thunderbird 153. Keep the
+  // existing compose-based sending path for every earlier version, even if a
+  // compatibility layer happens to expose a messages API object.
+  try {
+    const runtimeApi = (typeof browser !== "undefined" && browser.runtime)
+      || (typeof messenger !== "undefined" && messenger.runtime);
+    if (runtimeApi && typeof runtimeApi.getBrowserInfo === "function") {
+      const info = await runtimeApi.getBrowserInfo();
+      const major = Number.parseInt(String(info && info.version || "").split(".")[0], 10);
+      if (Number.isFinite(major) && major < 153) return false;
+    }
+  } catch (e) {
+    // If version detection is unavailable, the API capability check above is
+    // still a safe fallback for Thunderbird-compatible environments.
+  }
+
+  return true;
+}
+
 async function sendDirect(message) {
   const details = await buildComposeDetails(message);
+  const messagesApi = (typeof browser !== "undefined" && browser.messages)
+    || (typeof messenger !== "undefined" && messenger.messages);
+
+  // messages.sendMessage() uses NewMessageDetails. ComposeDetails is accepted
+  // by newer Thunderbird versions, but deliveryFormat is the portable way to
+  // tell the messages API that body contains HTML.
+  const directDetails = {
+    ...details,
+    deliveryFormat: "html"
+  };
+  delete directDetails.isPlainText;
 
   // messages.send is optional. Use the direct API only after the user granted
   // it from the Send button; otherwise keep the compose-based fallback.
-  if (message.useDirectSend && browser.messages && typeof browser.messages.sendMessage === "function") {
-    await browser.messages.sendMessage(details, { mode: "sendNow" });
+  if (message.useDirectSend && await canUseDirectMessagesSend()) {
+    await messagesApi.sendMessage(directDetails, { mode: "sendNow" });
     return { ok: true, direct: true };
   }
 
@@ -624,6 +661,25 @@ async function getDefaultSignature(message = {}) {
   }
 }
 
+async function getComposeIdentities(message = {}) {
+  try {
+    const preferredAccountId = await getPreferredAccountIdFromSource(message);
+    const { identity: defaultIdentity, accounts } = await getDefaultIdentityAndAccount(preferredAccountId);
+    const identities = [];
+    const seen = new Set();
+    for (const account of accounts || []) {
+      for (const identity of account.identities || []) {
+        if (!identity || !identity.id || seen.has(identity.id)) continue;
+        seen.add(identity.id);
+        identities.push({ id: identity.id, name: identity.name || "", email: identity.email || "" });
+      }
+    }
+    return { ok: true, identities, defaultIdentityId: defaultIdentity && defaultIdentity.id };
+  } catch (e) {
+    return { ok: false, identities: [], defaultIdentityId: null, error: String(e && e.message ? e.message : e) };
+  }
+}
+
 async function buildDraftMimeFile(message, state, identity) {
   const messageId = state.messageId || `<compose-tab-${randomToken()}@composeur-en-onglet.local>`;
   state.messageId = messageId;
@@ -868,5 +924,6 @@ browser.runtime.onMessage.addListener((message) => {
   if (message.type === "save-imported-draft") return saveImportedDraft(message);
   if (message.type === "delete-imported-draft") return deleteImportedDraft(message);
   if (message.type === "get-default-signature") return getDefaultSignature(message);
+  if (message.type === "get-compose-identities") return getComposeIdentities(message);
   return undefined;
 });
