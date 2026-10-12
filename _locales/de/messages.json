@@ -11,6 +11,9 @@
   "newMessageTitle": {
     "message": "Neue Nachricht"
   },
+  "senderLabel": {
+    "message": "Absender"
+  },
   "addressBookTitle": {
     "message": "Adressbuch"
   },
@@ -248,6 +251,15 @@
   "replyTitle": {
     "message": "Antworten"
   },
+  "replyHeader": {
+    "message": "Am $1 schrieb $2:"
+  },
+  "forwardedHeader": { "message": "-------- Weitergeleitete Nachricht --------" },
+  "forwardedFrom": { "message": "Von:" },
+  "forwardedDate": { "message": "Datum:" },
+  "forwardedSubject": { "message": "Betreff:" },
+  "forwardedTo": { "message": "An:" },
+  "originalAttachmentsError": { "message": "Anhänge der Originalnachricht wurden nicht hinzugefügt: $1" },
   "replyAllTitle": {
     "message": "Allen antworten"
   },
@@ -266,6 +278,9 @@
   "optionsSaved": {
     "message": "Option gespeichert."
   },
+  "draftSaved": { "message": "Entwurf gespeichert." },
+  "draftSaveError": { "message": "Fehler beim Speichern des Entwurfs: $1" },
+  "draftsFolderNotFound": { "message": "Der Entwurfsordner für die Thunderbird-Konten wurde nicht gefunden." },
   "editDraftButton": {
     "message": "✎ Im Tab-Verfasser bearbeiten"
   },

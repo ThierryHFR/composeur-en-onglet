@@ -11,6 +11,9 @@
   "newMessageTitle": {
     "message": "Nouveau message"
   },
+  "senderLabel": {
+    "message": "Expéditeur"
+  },
   "addressBookTitle": {
     "message": "Carnet d’adresses"
   },
@@ -248,6 +251,15 @@
   "replyTitle": {
     "message": "Répondre"
   },
+  "replyHeader": {
+    "message": "Le $1, $2 a écrit :"
+  },
+  "forwardedHeader": { "message": "-------- Message transféré --------" },
+  "forwardedFrom": { "message": "De :" },
+  "forwardedDate": { "message": "Date :" },
+  "forwardedSubject": { "message": "Sujet :" },
+  "forwardedTo": { "message": "À :" },
+  "originalAttachmentsError": { "message": "Pièces jointes du message original non ajoutées : $1" },
   "replyAllTitle": {
     "message": "Répondre à tous"
   },
@@ -266,6 +278,9 @@
   "optionsSaved": {
     "message": "Option enregistrée."
   },
+  "draftSaved": { "message": "Brouillon sauvegardé." },
+  "draftSaveError": { "message": "Erreur de sauvegarde du brouillon : $1" },
+  "draftsFolderNotFound": { "message": "Dossier Brouillons introuvable pour les comptes Thunderbird." },
   "editDraftButton": {
     "message": "✎ Modifier dans Composeur en onglet"
   },

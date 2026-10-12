@@ -11,6 +11,9 @@
   "newMessageTitle": {
     "message": "Nuevo mensaje"
   },
+  "senderLabel": {
+    "message": "Remitente"
+  },
   "addressBookTitle": {
     "message": "Libreta de direcciones"
   },
@@ -248,6 +251,15 @@
   "replyTitle": {
     "message": "Responder"
   },
+  "replyHeader": {
+    "message": "El $1, $2 escribió:"
+  },
+  "forwardedHeader": { "message": "-------- Mensaje reenviado --------" },
+  "forwardedFrom": { "message": "De:" },
+  "forwardedDate": { "message": "Fecha:" },
+  "forwardedSubject": { "message": "Asunto:" },
+  "forwardedTo": { "message": "Para:" },
+  "originalAttachmentsError": { "message": "No se añadieron los adjuntos del mensaje original: $1" },
   "replyAllTitle": {
     "message": "Responder a todos"
   },
@@ -266,6 +278,9 @@
   "optionsSaved": {
     "message": "Opción guardada."
   },
+  "draftSaved": { "message": "Borrador guardado." },
+  "draftSaveError": { "message": "Error al guardar el borrador: $1" },
+  "draftsFolderNotFound": { "message": "No se encontró la carpeta de borradores de las cuentas de Thunderbird." },
   "editDraftButton": {
     "message": "✎ Editar en el redactor en pestaña"
   },

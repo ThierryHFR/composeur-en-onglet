@@ -372,7 +372,7 @@ async function getMessageComposeContext(message) {
   const recipients = Array.isArray(m.recipients) ? m.recipients : [];
   const ccList = Array.isArray(m.ccList) ? m.ccList : [];
   const originalBodyHtml = await getOriginalMessageBodyHtml(id);
-  const replyHeader = `Le ${formatReplyDate(m.date)}, ${formatReplyAuthor(author)} a écrit :`;
+  const replyAuthor = formatReplyAuthor(author);
   const replyPosition = await getReplyPosition();
 
   if (mode === "draft") {
@@ -398,9 +398,10 @@ async function getMessageComposeContext(message) {
       bcc: "",
       subject: cleanSubject(m.subject, "Fwd"),
       originalBodyHtml,
-      replyHeader,
+      replyDate: m.date,
+      replyAuthor,
       forwardFrom: author,
-      forwardDate: formatReplyDate(m.date),
+      forwardDate: m.date,
       forwardSubject: m.subject || "",
       forwardTo: recipients.join(", "),
       replyPosition
@@ -411,9 +412,9 @@ async function getMessageComposeContext(message) {
     const toList = uniqueRecipientsExcludingOwn([author, ...recipients], ownEmails);
     const ccFiltered = uniqueRecipientsExcludingOwn(ccList, ownEmails)
       .filter(cc => !toList.map(normalizeEmail).includes(normalizeEmail(cc)));
-    return { mode, sourceMessageId: id, to: toList.join(", "), cc: ccFiltered.join(", "), bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition, customHeaders: await getReplyHeaders(id) };
+    return { mode, sourceMessageId: id, to: toList.join(", "), cc: ccFiltered.join(", "), bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyDate: m.date, replyAuthor, replyPosition, customHeaders: await getReplyHeaders(id) };
   }
-  return { mode: "reply", sourceMessageId: id, to: author, cc: "", bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyHeader, replyPosition, customHeaders: await getReplyHeaders(id) };
+  return { mode: "reply", sourceMessageId: id, to: author, cc: "", bcc: "", subject: cleanSubject(m.subject, "Re"), originalBodyHtml, replyDate: m.date, replyAuthor, replyPosition, customHeaders: await getReplyHeaders(id) };
 }
 
 
@@ -628,7 +629,7 @@ async function findDraftsFolder(message) {
     if (named) return { folder: named, identity: (acc.identities || [])[0] || identity };
   }
 
-  throw new Error("Dossier Brouillons introuvable pour les comptes Thunderbird.");
+  throw new Error(browser.i18n.getMessage("draftsFolderNotFound") || "Drafts folder not found for Thunderbird accounts.");
 }
 
 function buildIdentitySignatureHtml(identity) {

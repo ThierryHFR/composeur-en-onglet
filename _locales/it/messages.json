@@ -11,6 +11,9 @@
   "newMessageTitle": {
     "message": "Nuovo messaggio"
   },
+  "senderLabel": {
+    "message": "Mittente"
+  },
   "addressBookTitle": {
     "message": "Rubrica"
   },
@@ -248,6 +251,15 @@
   "replyTitle": {
     "message": "Rispondi"
   },
+  "replyHeader": {
+    "message": "Il $1, $2 ha scritto:"
+  },
+  "forwardedHeader": { "message": "-------- Messaggio inoltrato --------" },
+  "forwardedFrom": { "message": "Da:" },
+  "forwardedDate": { "message": "Data:" },
+  "forwardedSubject": { "message": "Oggetto:" },
+  "forwardedTo": { "message": "A:" },
+  "originalAttachmentsError": { "message": "Gli allegati del messaggio originale non sono stati aggiunti: $1" },
   "replyAllTitle": {
     "message": "Rispondi a tutti"
   },
@@ -266,6 +278,9 @@
   "optionsSaved": {
     "message": "Opzione salvata."
   },
+  "draftSaved": { "message": "Bozza salvata." },
+  "draftSaveError": { "message": "Errore nel salvataggio della bozza: $1" },
+  "draftsFolderNotFound": { "message": "La cartella delle bozze degli account Thunderbird non è stata trovata." },
   "editDraftButton": {
     "message": "✎ Modifica nel compositore in scheda"
   },
