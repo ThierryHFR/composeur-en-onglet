@@ -11,6 +11,9 @@
   "newMessageTitle": {
     "message": "New message"
   },
+  "senderLabel": {
+    "message": "From"
+  },
   "addressBookTitle": {
     "message": "Address book"
   },
@@ -248,6 +251,15 @@
   "replyTitle": {
     "message": "Reply"
   },
+  "replyHeader": {
+    "message": "On $1, $2 wrote:"
+  },
+  "forwardedHeader": { "message": "-------- Forwarded message --------" },
+  "forwardedFrom": { "message": "From:" },
+  "forwardedDate": { "message": "Date:" },
+  "forwardedSubject": { "message": "Subject:" },
+  "forwardedTo": { "message": "To:" },
+  "originalAttachmentsError": { "message": "Original message attachments were not added: $1" },
   "replyAllTitle": {
     "message": "Reply all"
   },
@@ -266,6 +278,9 @@
   "optionsSaved": {
     "message": "Option saved."
   },
+  "draftSaved": { "message": "Draft saved." },
+  "draftSaveError": { "message": "Draft save error: $1" },
+  "draftsFolderNotFound": { "message": "Drafts folder not found for Thunderbird accounts." },
   "editDraftButton": {
     "message": "✎ Edit in Tab Composer"
   },

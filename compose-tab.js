@@ -102,8 +102,31 @@ function setEditorCursor(node, atEnd = false) {
   sel.addRange(range);
 }
 
+function formatReplyDate(dateValue) {
+  const date = dateValue ? new Date(dateValue) : new Date();
+  if (Number.isNaN(date.getTime())) return "";
+  try {
+    return new Intl.DateTimeFormat(browser.i18n.getUILanguage(), {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(date);
+  } catch (e) {
+    return date.toLocaleString();
+  }
+}
+
+function localizedReplyHeader(ctx) {
+  if (ctx && ctx.replyDate) {
+    return msg("replyHeader", [formatReplyDate(ctx.replyDate), ctx.replyAuthor || ""]);
+  }
+  return msg("replyHeader", ["", ""]);
+}
+
 function applyReplyOrReplyAllBody(ctx) {
-  const header = ctx && ctx.replyHeader ? ctx.replyHeader : "Le message original a écrit :";
+  const header = localizedReplyHeader(ctx);
   const quotedOriginal = quoteOriginalMessage(ctx && ctx.originalBodyHtml ? ctx.originalBodyHtml : "");
   const replyPosition = ctx && ctx.replyPosition ? ctx.replyPosition : "above";
 
@@ -121,11 +144,11 @@ function applyReplyOrReplyAllBody(ctx) {
 function buildForwardedMessageHtml(ctx, original) {
   const parts = [];
   if (htmlToPlainText(original).trim()) {
-    parts.push('<div>-------- Message transféré --------</div>');
-    if (ctx && ctx.forwardFrom) parts.push(`<div><b>De :</b> ${escapeHtml(ctx.forwardFrom)}</div>`);
-    if (ctx && ctx.forwardDate) parts.push(`<div><b>Date :</b> ${escapeHtml(ctx.forwardDate)}</div>`);
-    if (ctx && ctx.forwardSubject) parts.push(`<div><b>Sujet :</b> ${escapeHtml(ctx.forwardSubject)}</div>`);
-    if (ctx && ctx.forwardTo) parts.push(`<div><b>À :</b> ${escapeHtml(ctx.forwardTo)}</div>`);
+    parts.push(`<div>${escapeHtml(msg("forwardedHeader"))}</div>`);
+    if (ctx && ctx.forwardFrom) parts.push(`<div><b>${escapeHtml(msg("forwardedFrom"))}</b> ${escapeHtml(ctx.forwardFrom)}</div>`);
+    if (ctx && ctx.forwardDate) parts.push(`<div><b>${escapeHtml(msg("forwardedDate"))}</b> ${escapeHtml(formatReplyDate(ctx.forwardDate))}</div>`);
+    if (ctx && ctx.forwardSubject) parts.push(`<div><b>${escapeHtml(msg("forwardedSubject"))}</b> ${escapeHtml(ctx.forwardSubject)}</div>`);
+    if (ctx && ctx.forwardTo) parts.push(`<div><b>${escapeHtml(msg("forwardedTo"))}</b> ${escapeHtml(ctx.forwardTo)}</div>`);
     parts.push('<div><br></div>');
     parts.push(`<blockquote type="cite" class="moz-cite-prefix">${original}</blockquote>`);
   }
@@ -159,7 +182,7 @@ async function addOriginalAttachments(messageId) {
     }
     renderAttachments();
   } catch (e) {
-    setStatus(msg("genericError", ["Pièces jointes du message original non ajoutées : " + String(e && e.message ? e.message : e)]));
+    setStatus(msg("originalAttachmentsError", [String(e && e.message ? e.message : e)]));
   }
 }
 
@@ -568,9 +591,9 @@ async function saveDraftNow() {
   try {
     await browser.runtime.sendMessage({ type: "save-imported-draft", ...collectDraftMessage() });
     lastDraftFingerprint = fp;
-    setStatus("Brouillon sauvegardé.");
+    setStatus(msg("draftSaved"));
   } catch (e) {
-    setStatus(msg("genericError", ["Sauvegarde brouillon : " + String(e && e.message ? e.message : e)]));
+    setStatus(msg("draftSaveError", [String(e && e.message ? e.message : e)]));
   }
 }
 
