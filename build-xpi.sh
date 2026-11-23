@@ -11,6 +11,52 @@ if [ -z "$version" ]; then
     exit 1
 fi
 
+case "$version" in
+    *.*.*) ;;
+    *)
+        echo "Version must use MAJOR.MINOR.PATCH format (found: $version)." >&2
+        exit 1
+        ;;
+esac
+
+major=${version%%.*}
+version_tail=${version#*.}
+minor=${version_tail%%.*}
+patch=${version_tail#*.}
+case "$major" in
+    ''|*[!0-9]*)
+        echo "Version must use numeric MAJOR.MINOR.PATCH components (found: $version)." >&2
+        exit 1
+        ;;
+esac
+case "$minor" in
+    ''|*[!0-9]*)
+        echo "Version must use numeric MAJOR.MINOR.PATCH components (found: $version)." >&2
+        exit 1
+        ;;
+esac
+case "$patch" in
+    ''|*[!0-9]*)
+        echo "Version must use numeric MAJOR.MINOR.PATCH components (found: $version)." >&2
+        exit 1
+        ;;
+esac
+
+if [ "$patch" -lt 9 ]; then
+    patch=$((patch + 1))
+elif [ "$minor" -lt 9 ]; then
+    minor=$((minor + 1))
+    patch=0
+else
+    major=$((major + 1))
+    minor=0
+    patch=0
+fi
+
+version="$major.$minor.$patch"
+sed "s/^[[:space:]]*\"version\"[[:space:]]*:.*/  \"version\": \"$version\",/" "$project_dir/manifest.json" > "$project_dir/manifest.json.tmp"
+mv "$project_dir/manifest.json.tmp" "$project_dir/manifest.json"
+
 output=${1:-"dist/tab-composer-${version}.xpi"}
 case "$output" in
     /*) ;;
@@ -32,7 +78,8 @@ trap 'rm -rf "$temporary_dir"' EXIT HUP INT TERM
     zip -q -r "$temporary_xpi" . \
         -x '.git' '.git/*' \
         -x 'PRIVACY.md' \
-        -x 'test' 'test/*' \
+        -x 'PRIVACY.md' \
+        -x '*.txt' \
         -x 'tests' 'tests/*' \
         -x "$script_name" \
         -x 'dist' 'dist/*'
